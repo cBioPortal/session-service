@@ -46,7 +46,7 @@ router.route('/sessions')
 
         // note this does not catch something like [{}]
         if (Object.keys(req.body).length == 0) {
-            console.log("no data in body")
+            console.log("no data in body");
             var err = new Error("Some JSON data required.");
             err.status = 404;
             return next(err);
