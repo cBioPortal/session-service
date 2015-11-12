@@ -1,5 +1,4 @@
 // server.js
-// Author: Manda Wilson, wilson@cbio.mskcc.org
 // Note: default bodyParser.limit is 100kb for request body size
 //   See: https://github.com/expressjs/body-parser#bodyparserjsonoptions
 
