@@ -39,6 +39,7 @@ router.route('/sessions')
 
     // create a session (accessed at POST http://localhost:8080/api/sessions)
     // returns { _id: session._id } on success
+    // if no JSON data passed in request body returns status 404 with {error: 'Some JSON data required.'} in body
     .post(function(req, res, next) {
         
         var session = new Session();      // create a new instance of the Session model
@@ -94,7 +95,8 @@ router.route('/sessions/:session_id')
     })
 
     // update the session with this id (accessed at PUT http://localhost:8080/api/sessions/:session_id)
-    // TODO tries to update a null object and fails - fix
+    // if session_id does not exist returns status 404 with {error: 'Invalid URL'} in body
+    // if no JSON data passed in request body returns status 404 with {error: 'Some JSON data required.'} in body
     .put(function(req, res, next) {
 
         // use our session model to find the session we want
