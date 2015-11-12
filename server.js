@@ -95,7 +95,7 @@ router.route('/sessions/:session_id')
 
     // update the session with this id (accessed at PUT http://localhost:8080/api/sessions/:session_id)
     // TODO tries to update a null object and fails - fix
-    .put(function(req, res) {
+    .put(function(req, res, next) {
 
         // use our session model to find the session we want
         Session.findById(req.params.session_id, function(err, session) {
