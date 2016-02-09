@@ -42,7 +42,7 @@ modify this section of src/main/resources/application.properties:
 spring.data.mongodb.uri=mongodb://localhost:27017/session_service
 ```
 * Assumes you want to run the server on port 8080.  This can be overridden by
-setting the process's SERVER_PORT environment variable. E.g.
+setting the process's SERVER_PORT environment variable.
 ```
 session-service$ export set SERVER_PORT=8090; mvn package && java -jar target/session_service-0.1.0.jar
 ```
