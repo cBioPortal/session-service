@@ -35,7 +35,6 @@ package org.cbioportal.session_service.domain;
 import org.springframework.data.annotation.Id;
 
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
-//import com.mongodb.DBObject;
 
 /**
 * @author Manda Wilson 
