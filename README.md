@@ -53,9 +53,8 @@ session-service$ export set SERVER_PORT=8090; mvn package && java -jar target/se
 ### Create
 
 #### POST http://localhost:8080/api/sessions/
-Creates a session.  Returns { _id: session._id } on success.
-If no JSON data passed in request body returns status 404 with 
-{error: 'Some JSON data required.'} in body.
+Creates a session.  Returns status 200 and session in response body
+on success. 
 Example body for POST http://localhost:8080/api/sessions/:
 ```
 {"portal-session": "my session information"}
