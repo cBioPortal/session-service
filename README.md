@@ -6,42 +6,46 @@ Session information is stored in JSON, so this API generalizes to any JSON objec
 
 ### Requirements
 
-Node: https://nodejs.org/en/
+JDK 1.8 or later: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+Maven 3.0+: http://maven.apache.org/download.cgi
 
 MongoDB: https://docs.mongodb.org/manual/
 
 ### Installation and setup
 
-Create database 'portal' using the 'mongo' shell interface to MongoDB:
+Create database 'session_service' using the 'mongo' shell interface to MongoDB:
 
 ```
 $ mongo
 
-> use portal
+> use session_service
 ```
-Clone repository, install dependencies, and run node server:
+Clone repository, compile, run tests, and start server:
 
 ```
 $ git clone https://github.com/cBioPortal/session-service.git
 
 $ cd session-service
 
-session-service$ npm install
+session-service$ mvn package && java -jar target/session_service-0.1.0.jar
 
-session-service$ node server.js
 ```
 
 Assumptions: 
 
 * Assumes MongoDB is running on localhost, default port 27017, 
-that the database name is 'portal' and that no username and password are required.
+that the database name is 'session_service' and that no username and password are required.
 If any of these things are not true (hopefully the database is password protected)
-modify this section of server.js:
+modify this section of src/main/resources/application.properties:
 ```
-mongoose.connect('mongodb://localhost:27017/portal');
+spring.data.mongodb.uri=mongodb://localhost:27017/session_service
 ```
 * Assumes you want to run the server on port 8080.  This can be overridden by
-setting the process's PORT environment variable.
+setting the process's SERVER_PORT environment variable. E.g.
+```
+export set SERVER_PORT=8090; mvn package && java -jar target/session_service-0.1.0.jar
+```
 
 
 ## API
