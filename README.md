@@ -22,14 +22,18 @@ $ mongo
 > use session_service
 ```
 Clone repository, compile, run tests, and start server:
-
 ```
 $ git clone https://github.com/cBioPortal/session-service.git
 
 $ cd session-service
 
 session-service$ mvn package -Dpackaging.type=jar && java -jar target/session_service-0.1.0.jar
+```
 
+To run with a different profile (e.g. application-PROFILE.properties):
+
+```
+session-service$ mvn package -Dpackaging.type=jar && java -jar target/session_service-0.1.0.jar --spring.profiles.active=PROFILE
 ```
 
 Generate war file:
@@ -38,18 +42,29 @@ Generate war file:
 $ cd session-service
 
 session-service$ mvn package
+```
 
+In production run with an external configuration file using a JVM property so that database properties are not saved in Github:
+
+```
+-Dspring.config.location=/srv/myapp/config.properties
 ```
 
 Assumptions: 
 
-* Assumes MongoDB is running on localhost, default port 27017, 
-that the database name is 'session_service' and that no username and password are required.
+* When running 'local' profile (using application-local.properties) assumes MongoDB 
+is running on localhost, default port 27017, that the database name is 'session_service' 
+and that no username and password are required.
 If any of these things are not true (hopefully the database is password protected)
-modify this section of src/main/resources/application.properties:
+run with an external file using a command line switch:
 ```
-spring.data.mongodb.uri=mongodb://localhost:27017/session_service
+--spring.config.location=/srv/myapp/config.properties
 ```
+Or setting a JVM property:
+```
+-Dspring.config.location=/srv/myapp/config.properties
+```
+
 * Assumes you want to run the server on port 8080.  This can be overridden by
 setting the process's SERVER_PORT environment variable.
 ```
