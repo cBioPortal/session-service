@@ -8,7 +8,7 @@
     <groupId>org.cbioportal.session_service</groupId>
     <artifactId>session_service</artifactId>
     <version>0.1.0</version>
-    <!--packaging>${packaging.type}</packaging-->
+    <packaging>${packaging.type}</packaging>
 
     <!-- inherit defaults from spring boot -->
     <parent>
@@ -45,11 +45,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
@@ -66,13 +66,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!--executions>
+                <executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
                         </goals>
                     </execution>
-                </executions-->
+                </executions>
             </plugin>
         </plugins>
     </build>

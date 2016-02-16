@@ -28,7 +28,16 @@ $ git clone https://github.com/cBioPortal/session-service.git
 
 $ cd session-service
 
-session-service$ mvn package && java -jar target/session_service-0.1.0.jar
+session-service$ mvn package -Dpackaging.type=jar && java -jar target/session_service-0.1.0.jar
+
+```
+
+Generate war file:
+
+```
+$ cd session-service
+
+session-service$ mvn package
 
 ```
 
