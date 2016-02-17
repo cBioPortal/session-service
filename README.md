@@ -68,7 +68,7 @@ Or setting a JVM property:
 * Assumes you want to run the server on port 8080.  This can be overridden by
 setting the process's SERVER_PORT environment variable.
 ```
-session-service$ export set SERVER_PORT=8090; mvn package && java -jar target/session_service-0.1.0.jar
+session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar && java -jar target/session_service-0.1.0.jar
 ```
 
 
@@ -140,8 +140,7 @@ Returns all sessions.  Returns "[]" if no sessions.  Example response:
 ```
 
 #### GET http://localhost:8080/api/sessions/:session_id
-Returns single session with id :session_id.  If :session_id does 
-not exist returns empty string in body.
+Returns single session with id :session_id.  
 Example response for http://localhost:8080/api/sessions/56ba6a91ef860b0c66eaef89:
 ```
 {
@@ -149,6 +148,17 @@ Example response for http://localhost:8080/api/sessions/56ba6a91ef860b0c66eaef89
   "data": {
     "portal-session": "my session information"
   }
+}
+```
+If an invalid :session_id is passed returns status 404 with a request body like this:
+```
+{
+  "timestamp": 1455740248591,
+  "status": 404,
+  "error": "Not Found",
+  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
+  "message": "could not find session 'test'.",
+  "path": "/api/sessions/test"
 }
 ```
 
@@ -170,7 +180,7 @@ Example response:
   }
 }
 ```
-If no JSON data passed in request body return status 400 with a request
+If no JSON data passed in request body returns status 400 with a request
 body like this:
 ```
 {
@@ -182,6 +192,29 @@ body like this:
   "path": "/api/sessions/56ba6a91ef860b0c66eaef89"
 }
 ```
+If an invalid :session_id is passed returns status 404 with a request body like this:
+```
+{
+  "timestamp": 1455740248591,
+  "status": 404,
+  "error": "Not Found",
+  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
+  "message": "could not find session 'test'.",
+  "path": "/api/sessions/test"
+}
+```
+Sending invalid JSON in the request body returns a 500 status
+with something like the following in the body:
+```
+{
+  "timestamp": 1455742301379,
+  "status": 500,
+  "error": "Internal Server Error",
+  "exception": "com.mongodb.util.JSONParseException",
+  "message": "\n{\"portal-session\": blah blah blah}\n                     ^",
+  "path": "/api/sessions/56ba73bfef866d1ecbce19b0"
+}
+```
 
 ### Delete
 
@@ -190,6 +223,14 @@ Deletes a session with id :session_id.
 Returns 200 status on success with empty request body. 
 Example: http://localhost:8080/api/sessions/56ba6a91ef860b0c66eaef89
 
-
-
-
+If an invalid :session_id is passed returns status 404 with a request body like this:
+```
+{
+  "timestamp": 1455740248591,
+  "status": 404,
+  "error": "Not Found",
+  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
+  "message": "could not find session 'test'.",
+  "path": "/api/sessions/test"
+}
+```

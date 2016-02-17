@@ -36,6 +36,7 @@ import org.cbioportal.session_service.domain.*;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
 import java.util.Map;
 
@@ -70,20 +71,40 @@ public class SessionServiceController
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Session getSession(@PathVariable String id) 
     {
-        return sessionRepository.findOne(id);
+        Session session = sessionRepository.findOne(id);
+        if (session != null) {
+            return session;
+        }
+        throw new SessionNotFoundException(id);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public Session updateSession(@PathVariable String id, @RequestBody String data)
     {
         Session savedSession = sessionRepository.findOne(id);
-        savedSession.setData(data);
-        return sessionRepository.save(savedSession);
+        if (savedSession != null) {
+            savedSession.setData(data);
+            return sessionRepository.save(savedSession);
+        }
+        throw new SessionNotFoundException(id);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteSession(@PathVariable String id)
     {
-        sessionRepository.delete(id);        
+        Session session = sessionRepository.findOne(id);
+        if (session != null) {
+            sessionRepository.delete(session);
+        } else {
+            throw new SessionNotFoundException(id);
+        }
     } 
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    class SessionNotFoundException extends RuntimeException {
+
+        public SessionNotFoundException(String id) {
+            super("could not find session '" + id + "'.");
+        }
+    }
 }
