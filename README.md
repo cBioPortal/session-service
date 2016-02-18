@@ -43,11 +43,21 @@ $ cd session-service
 
 session-service$ mvn package
 ```
+To generate war file with a different profile (e.g. application-PROFILE.properties):
+```
+mvn package -Dspring.profiles.active=PROFILE
+```
 
 In production run with an external configuration file using a JVM property so that database properties are not saved in Github:
 
 ```
 -Dspring.config.location=/srv/myapp/config.properties
+```
+
+To have a context root that is not "/", change the application-PROFILE.properties file:
+```
+server.contextPath=/session_service
+server.port=8080
 ```
 
 Assumptions: 
