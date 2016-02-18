@@ -84,7 +84,9 @@ public class SessionServiceTest {
         // get all and delete them
         ResponseEntity<String> response = template.getForEntity(base.toString(), String.class);
         List<String> ids = parseIds(response.getBody());
-        ids.forEach(id -> template.delete(base.toString() + id));
+        for (String id : ids) { 
+			template.delete(base.toString() + id);
+		}
     }
 
     @Test
