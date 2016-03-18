@@ -32,9 +32,22 @@
 
 package org.cbioportal.session_service.domain;
 
+import java.util.List;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 /**
- * @author Manda Wilson 
+ * @author Manda Wilson
  */
-public interface SessionRepository extends MongoRepository<Session, String> {/* Includes standard CRUD operations. */}
+public interface SessionRepository extends MongoRepository<Session, String> {
+	/* Includes standard CRUD operations. */
+	/**
+	 * This method returns list of sessions(virtual cohorts) created by the user
+	 * 
+	 * @param virtualCohortID
+	 * @return List<Session>
+	 */
+	@Query(value = "{ 'data.virtualCohort.userID' : ?0 }")
+	List<Session> findVCByUserID(String virtualCohortID);
+}
