@@ -109,13 +109,13 @@ public class SessionServiceController
     }
     
     @RequestMapping(value = "/query", method = RequestMethod.GET)
-    public List<Session> getSessionByUserID(@RequestParam(name="email") String email) 
+    public List<Session> getSessionByUserID(@RequestParam(name="userid") String userid) 
     {
-        List<Session> sessions = sessionRepository.findVCByUserID(email);
+        List<Session> sessions = sessionRepository.findVCByUserID(userid);
         if (sessions.size()!=0) {
             return sessions;
         }
-        throw new UserSessionNotFoundException(email);
+        throw new UserSessionNotFoundException(userid);
     }
     
 
@@ -130,8 +130,8 @@ public class SessionServiceController
     @ResponseStatus(HttpStatus.NOT_FOUND)
     class UserSessionNotFoundException extends RuntimeException {
 
-        public UserSessionNotFoundException(String id) {
-            super("could not find user '" + id + "'.");
+        public UserSessionNotFoundException(String userid) {
+            super("could not find session(s) for the user '" + userid + "'.");
         }
     }
 }
