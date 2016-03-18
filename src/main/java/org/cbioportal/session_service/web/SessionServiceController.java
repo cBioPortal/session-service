@@ -32,18 +32,26 @@
 
 package org.cbioportal.session_service.web;
 
-import org.cbioportal.session_service.domain.*;
+import java.util.List;
 
-import org.springframework.web.bind.annotation.*;
+import org.cbioportal.session_service.domain.Session;
+import org.cbioportal.session_service.domain.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Manda Wilson 
  */
 @RestController // shorthand for @Controller, @ResponseBody
+@CrossOrigin(origins = "*") // Added to accessing from iViz application
 @RequestMapping(value = "/api/sessions/")
 public class SessionServiceController
 {
@@ -98,13 +106,32 @@ public class SessionServiceController
         } else {
             throw new SessionNotFoundException(id);
         }
-    } 
+    }
+    
+    @RequestMapping(value = "/query", method = RequestMethod.GET)
+    public List<Session> getSessionByUserID(@RequestParam(name="userid") String userid) 
+    {
+        List<Session> sessions = sessionRepository.findVCByUserID(userid);
+        if (sessions.size()!=0) {
+            return sessions;
+        }
+        throw new UserSessionNotFoundException(userid);
+    }
+    
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     class SessionNotFoundException extends RuntimeException {
 
         public SessionNotFoundException(String id) {
             super("could not find session '" + id + "'.");
+        }
+    }
+    
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    class UserSessionNotFoundException extends RuntimeException {
+
+        public UserSessionNotFoundException(String userid) {
+            super("could not find session(s) for the user '" + userid + "'.");
         }
     }
 }
