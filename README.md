@@ -87,7 +87,7 @@ session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar &
 ### Create
 
 #### POST http://localhost:8080/api/sessions/
-Creates a session.  Returns status 200 and session in response body
+Creates a session.  Returns status 200 and session id in response body
 on success. 
 Example body for POST http://localhost:8080/api/sessions/:
 ```
@@ -96,10 +96,7 @@ Example body for POST http://localhost:8080/api/sessions/:
 Example response:
 ```
 {
-  "id": "56ba6a91ef860b0c66eaef89",
-  "data": {
-    "portal-session": "my session information"
-  }
+  "id": "56ba6a91ef860b0c66eaef89"
 }
 ```
 If no JSON data passed in request body returns 400 status
@@ -175,20 +172,12 @@ If an invalid :session_id is passed returns status 404 with a request body like 
 ### Update
 
 #### PUT http://localhost:8080/api/sessions/:session_id
-Updates a session with id :session_id.  Returns updated session
-on success. 
+Updates a session with id :session_id.  
+Returns 200 status on success with empty request body. 
 Example body for http://localhost:8080/api/sessions/564372de341cc1380e000001:
 ```
 {"portal-session": "my UPDATED session information"}
 ```
-Example response:
-```
-{
-  "id": "56ba6a91ef860b0c66eaef89",
-  "data": {
-    "portal-session": "my UPDATED session information"
-  }
-}
 ```
 If no JSON data passed in request body returns status 400 with a request
 body like this:
