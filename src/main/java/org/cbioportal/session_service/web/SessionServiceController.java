@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author Manda Wilson 
@@ -57,9 +58,12 @@ public class SessionServiceController
     }
     
     @RequestMapping(method = RequestMethod.POST)
-    public Session addSession(@RequestBody String data) 
+    public Map<String, String> addSession(@RequestBody String data) 
     {
-        return sessionRepository.save(new Session(data)); 
+        Session savedSession = sessionRepository.save(new Session(data)); 
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("id", savedSession.getId());
+        return map;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -79,12 +83,15 @@ public class SessionServiceController
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public Session updateSession(@PathVariable String id, @RequestBody String data)
+    public Map<String, String> updateSession(@PathVariable String id, @RequestBody String data)
     {
         Session savedSession = sessionRepository.findOne(id);
         if (savedSession != null) {
             savedSession.setData(data);
-            return sessionRepository.save(savedSession);
+            Session updatedSession = sessionRepository.save(savedSession);
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("id", updatedSession.getId());
+            return map;
         }
         throw new SessionNotFoundException(id);
     }

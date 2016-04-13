@@ -114,9 +114,17 @@ public class SessionServiceTest {
         String data = "\"portal-session\":\"my session information\"";
         ResponseEntity<String> response = addData(data);
 
-        // test that we get the db record back and that the status was 200 
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        // test that the status was 200 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+
+        // get id
+        List<String> ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String id = ids.get(0);
+
+        // get record
+        response = template.getForEntity(base.toString() + id, String.class);
+        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
     }
 
     @Test
@@ -125,8 +133,8 @@ public class SessionServiceTest {
         String data = "";
         ResponseEntity<String> response = addData(data);
 
-        // test that we get the db record back and that the status was 200 
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        // test that we get an id back and that the status was 200 
+        assertThat(response.getBody(), containsString("id"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
        
         response = addData(null); 
@@ -172,16 +180,24 @@ public class SessionServiceTest {
         String data = "\"portal-session\":\"my session information\"";
         ResponseEntity<String> response = addData(data);
         System.out.println("MEW: updateSession() response body = " + response.getBody());
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
 
         // get id
         List<String> ids = parseIds(response.getBody());
         assertThat(ids.size(), equalTo(1));
         String id = ids.get(0);
 
+        // get record
+        response = template.getForEntity(base.toString() + id, String.class);
+        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+
+        // update record
         data = "\"portal-session\":\"my session UPDATED information\"";
         HttpEntity<String> entity = prepareData(data);
         response = template.exchange(base.toString() + id, HttpMethod.PUT, entity, String.class);
+        assertThat(response.getBody(), containsString(id));
+
+        // get updated record
+        response = template.getForEntity(base.toString() + id, String.class);
         assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
         assertThat(response.getBody(), containsString("UPDATED"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
@@ -234,12 +250,15 @@ public class SessionServiceTest {
         // first add data
         String data = "\"portal-session\":{\"arg1\":\"first argument\"}";
         ResponseEntity<String> response = addData(data);
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
 
         // get id
         List<String> ids = parseIds(response.getBody());
         assertThat(ids.size(), equalTo(1));
         String id = ids.get(0);
+
+        // get record from database
+        response = template.getForEntity(base.toString() + id, String.class);
+        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
 
         // delete
         response = template.exchange(base.toString() + id, HttpMethod.DELETE, null, String.class);
