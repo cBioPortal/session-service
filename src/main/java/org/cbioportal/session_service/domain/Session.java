@@ -33,16 +33,20 @@
 package org.cbioportal.session_service.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
 /**
 * @author Manda Wilson 
 */
+@Document
 public class Session
 {
     @Id
     private String id;
+    @Indexed(unique=true)
     private Object data;
 
     public Session() 

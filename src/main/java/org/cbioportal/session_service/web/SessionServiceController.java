@@ -37,6 +37,7 @@ import org.cbioportal.session_service.domain.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -59,8 +60,15 @@ public class SessionServiceController
     
     @RequestMapping(method = RequestMethod.POST)
     public Map<String, String> addSession(@RequestBody String data) 
-    {
-        Session savedSession = sessionRepository.save(new Session(data)); 
+    { 
+        Session session = new Session(data); 
+        Session savedSession; 
+        try {
+            savedSession = sessionRepository.save(session); 
+        } catch (DuplicateKeyException e) {
+            // find session and return it
+            savedSession = sessionRepository.findOneByData(session.getData()); // need the JSON object data, not the string passed
+        }
         Map<String, String> map = new HashMap<String, String>();
         map.put("id", savedSession.getId());
         return map;
