@@ -194,7 +194,7 @@ public class SessionServiceTest {
         data = "\"portal-session\":\"my session UPDATED information\"";
         HttpEntity<String> entity = prepareData(data);
         response = template.exchange(base.toString() + id, HttpMethod.PUT, entity, String.class);
-        assertThat(response.getBody(), containsString(id));
+        assertThat(response.getBody(), equalTo(null)); 
 
         // get updated record
         response = template.getForEntity(base.toString() + id, String.class);

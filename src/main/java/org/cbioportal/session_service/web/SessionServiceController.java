@@ -83,15 +83,13 @@ public class SessionServiceController
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public Map<String, String> updateSession(@PathVariable String id, @RequestBody String data)
+    public void updateSession(@PathVariable String id, @RequestBody String data)
     {
         Session savedSession = sessionRepository.findOne(id);
         if (savedSession != null) {
             savedSession.setData(data);
-            Session updatedSession = sessionRepository.save(savedSession);
-            Map<String, String> map = new HashMap<String, String>();
-            map.put("id", updatedSession.getId());
-            return map;
+            sessionRepository.save(savedSession);
+            return;
         }
         throw new SessionNotFoundException(id);
     }
