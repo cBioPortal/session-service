@@ -178,7 +178,6 @@ Example body for http://localhost:8080/api/sessions/564372de341cc1380e000001:
 ```
 {"portal-session": "my UPDATED session information"}
 ```
-```
 If no JSON data passed in request body returns status 400 with a request
 body like this:
 ```
