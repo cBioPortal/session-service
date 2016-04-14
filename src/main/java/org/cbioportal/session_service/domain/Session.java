@@ -51,8 +51,6 @@ public class Session
     private String id;
     @Indexed(unique=true)
     private Object data;
-    @Indexed(unique=true)
-    private String checksum;
 
     public Session() 
     {
@@ -68,21 +66,9 @@ public class Session
         return id;
     }
 
-    public String getChecksum()
-    {
-        return checksum;    
-    }
-
     public void setData(String data)
     {
         this.data = JSON.parse(data);
-        // JSON.serialize it so that formatting is the same as the test later
-        this.checksum = DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
-    }
-
-    public String getValid()
-    {
-        return DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
     }
 
     public Object getData()
