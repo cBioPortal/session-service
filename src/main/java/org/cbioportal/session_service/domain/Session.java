@@ -33,8 +33,11 @@
 package org.cbioportal.session_service.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
+
+import org.springframework.util.DigestUtils;
 
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
@@ -48,6 +51,8 @@ public class Session
     private String id;
     @Indexed(unique=true)
     private Object data;
+    @Indexed(unique=true)
+    private String checksum;
 
     public Session() 
     {
@@ -55,7 +60,7 @@ public class Session
 
     public Session(String data)
     {
-        this.data = JSON.parse(data);
+        this.setData(data);
     }
 
     public String getId()
@@ -63,9 +68,21 @@ public class Session
         return id;
     }
 
+    public String getChecksum()
+    {
+        return checksum;    
+    }
+
     public void setData(String data)
     {
         this.data = JSON.parse(data);
+        // JSON.serialize it so that formatting is the same as the test later
+        this.checksum = DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
+    }
+
+    public String getValid()
+    {
+        return DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
     }
 
     public Object getData()
