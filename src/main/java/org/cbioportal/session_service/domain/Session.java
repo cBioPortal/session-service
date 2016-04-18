@@ -33,32 +33,29 @@
 package org.cbioportal.session_service.domain;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.index.Indexed;
-
-import org.springframework.util.DigestUtils;
 
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
 /**
 * @author Manda Wilson 
 */
-@Document
 public class Session
 {
     @Id
     private String id;
-    @Indexed(unique=true)
     private Object data;
+    private String source;
+    private String type;
 
-    public Session() 
+    private Session() 
     {
     }
 
-    public Session(String data)
+    public Session(String source, String type, String data)
     {
-        this.setData(data);
+        this.source = source;
+        this.type = type;
+        this.setData(data); // converts to JSON
     }
 
     public String getId()
@@ -74,6 +71,26 @@ public class Session
     public Object getData()
     {
         return data;
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setSource(String source)
+    {
+        this.source = source;
+    }
+
+    public String getSource()
+    {
+        return source;
     }
 
     @Override
