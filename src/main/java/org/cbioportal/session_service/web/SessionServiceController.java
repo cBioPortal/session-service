@@ -58,57 +58,67 @@ public class SessionServiceController
         this.sessionRepository = sessionRepository;
     }
     
-    @RequestMapping(method = RequestMethod.POST)
-    public Map<String, String> addSession(@RequestBody String data) 
+    @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
+    public Map<String, String> addSession(@PathVariable String source, 
+        @PathVariable String type, 
+        @RequestBody String data) 
     { 
-        Session session = new Session(data); 
-        Session savedSession; 
+        Session session = new Session(source, type, data); 
         try {
-            savedSession = sessionRepository.save(session); 
+            sessionRepository.saveSession(session); 
         } catch (DuplicateKeyException e) {
             // find session and return it
-            savedSession = sessionRepository.findOneByData(session.getData()); // need the JSON object data, not the string passed
+            // need the JSON object data, not the string passed
+            session = sessionRepository.findOneBySourceAndTypeAndData(source, 
+                type, 
+                session.getData()); 
         }
         Map<String, String> map = new HashMap<String, String>();
-        map.put("id", savedSession.getId());
+        map.put("id", session.getId());
         return map;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
-    public Iterable<Session> getSessions()
+    @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
+    public Iterable<Session> getSessions(@PathVariable String source, 
+        @PathVariable String type)
     {
-        return sessionRepository.findAll();
+        return sessionRepository.findBySourceAndType(source, type);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public Session getSession(@PathVariable String id) 
+    @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.GET)
+    public Session getSession(@PathVariable String source, 
+        @PathVariable String type,
+        @PathVariable String id) 
     {
-        Session session = sessionRepository.findOne(id);
+        Session session = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (session != null) {
             return session;
         }
         throw new SessionNotFoundException(id);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public void updateSession(@PathVariable String id, @RequestBody String data)
+    @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.PUT)
+    public void updateSession(@PathVariable String source, 
+        @PathVariable String type,
+        @PathVariable String id, 
+        @RequestBody String data)
     {
-        Session savedSession = sessionRepository.findOne(id);
+        Session savedSession = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (savedSession != null) {
             savedSession.setData(data);
-            sessionRepository.save(savedSession);
+            sessionRepository.saveSession(savedSession);
             return;
         }
         throw new SessionNotFoundException(id);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public void deleteSession(@PathVariable String id)
+    @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.DELETE)
+    public void deleteSession(@PathVariable String source, 
+        @PathVariable String type,
+        @PathVariable String id)
     {
-        Session session = sessionRepository.findOne(id);
-        if (session != null) {
-            sessionRepository.delete(session);
-        } else {
+        int numberDeleted = sessionRepository.deleteBySourceAndTypeAndId(source, type, id);
+        if (numberDeleted != 1) { // using unique id so never more than 1 
             throw new SessionNotFoundException(id);
         }
     } 
