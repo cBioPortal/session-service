@@ -38,8 +38,5 @@ import org.springframework.data.mongodb.repository.Query;
 /**
  * @author Manda Wilson 
  */
-public interface SessionRepository extends MongoRepository<Session, String> {
-    // only fields set to 1 are returned by Query
-    @Query(fields="{ id : 1 }")
-    Session findOneByData(Object data);
-}
+public interface SessionRepository 
+    extends MongoRepository<Session, String>, SessionRepositoryCustom {}
