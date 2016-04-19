@@ -151,6 +151,35 @@ public class SessionServiceTest {
     }
 
     @Test
+    public void addSessionUniqueness() throws Exception {
+        // add data
+        String data = "\"portal-session\":\"my session information\"";
+        ResponseEntity<String> response = addData(data);
+
+        // test that the status was 200 
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+
+        // get id
+        List<String> ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String id = ids.get(0);
+
+        // get record
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
+
+        // add same data to same source and type and confirm we get same id
+        response = addData(data);
+
+        // get new id
+        ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String newId = ids.get(0);
+
+        assertThat(newId, equalTo(id)); 
+    }
+
+    @Test
     public void getSession() throws Exception {
         // first add data
         String data = "\"portal-session\":{\"arg1\":\"first argument\"}";
