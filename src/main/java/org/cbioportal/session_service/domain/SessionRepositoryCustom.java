@@ -50,4 +50,6 @@ public interface SessionRepositoryCustom {
 
     int deleteBySourceAndTypeAndId(String source, String type, String id);
 
+    List<Session> findBySourceAndTypeAndQuery(String source, String type, String field, String value);
+
 }
