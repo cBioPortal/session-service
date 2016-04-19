@@ -34,6 +34,10 @@ package org.cbioportal.session_service.domain;
 
 import org.springframework.data.annotation.Id;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.validation.constraints.Pattern;
+
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
 /**
@@ -43,8 +47,13 @@ public class Session
 {
     @Id
     private String id;
+    @NotNull
     private Object data;
+    @NotNull
+    @Size(min=3, message="source has a minimum length of 3")
     private String source;
+    @NotNull
+    @Pattern(regexp="main_session|virtual_cohort", message="valid types are: 'main_session' and 'virtual_cohort'")
     private String type;
 
     private Session() 
