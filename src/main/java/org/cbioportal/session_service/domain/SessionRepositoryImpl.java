@@ -37,7 +37,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
-import com.mongodb.WriteResult; // TODO remove?
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -91,5 +90,11 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
         return this.mongoTemplate.remove(
             new Query(Criteria.where("source").is(source).and("type").is(type).and("id").is(id)),
             Session.class, type).getN();
+    }
+
+    public List<Session> findBySourceAndTypeAndQuery(String source, String type, String field, String value) {
+        return this.mongoTemplate.find(
+            new Query(Criteria.where("source").is(source).and("type").is(type).and(field).is(value)),
+            Session.class, type);
     }
 }
