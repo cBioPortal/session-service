@@ -44,6 +44,7 @@ import javax.validation.ConstraintViolation;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Manda Wilson 
@@ -88,6 +89,19 @@ public class SessionServiceController
         @PathVariable String type)
     {
         return sessionRepository.findBySourceAndType(source, type);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}/query")
+    public Iterable<Session> getSessionsByQuery(@PathVariable String source, 
+        @PathVariable String type, 
+        @RequestParam(name="field") String field,
+        @RequestParam(name="value") String value)
+    {
+        List<Session> sessions = sessionRepository.findBySourceAndTypeAndQuery(source, type, field, value);
+        if (sessions.size() != 0) {
+            return sessions;
+        }
+        throw new SessionNotFoundException("field=" + field + "&value=" + value);
     }
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.GET)
