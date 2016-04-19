@@ -90,7 +90,7 @@ session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar &
 Creates a session.  Returns status 200 and the session id in response body
 on success.  The session is saved in a collection named {type}. Both
 source and type are saved in the session document. Valid types are:
-main_session and virtual_cohort.  If a session with the same, source, type,
+main_session and virtual_cohort.  If a session with the same source, type,
 and data already exist in the database returns the session id of that session
 instead of creating a duplicate.
 
