@@ -92,9 +92,12 @@ on success.  The session is saved in a collection named {type}. Both
 source and type are saved in the session document. Valid types are:
 main_session and virtual_cohort.  If a session with the same source, type,
 and data already exists in the database returns the session id of that session
-instead of creating a duplicate.
+instead of creating a duplicate.  
 
-Example body for POST http://localhost:8080/api/sessions/msk_portal/msk_portal/main_session/
+WARNING: This is case sensitive. You should probably always use the same case
+for source and type.
+
+Example body for POST http://localhost:8080/api/sessions/msk_portal/main_session/
 ```
 {"title": "my main portal session", "description": "this is an example"}
 ```
@@ -182,6 +185,11 @@ If no session is found returns status 404 with a request body like this:
   "path": "/api/sessions/msk_portal/main_session/0"
 }
 ```
+WARNING: This is case sensitive.
+GET http://localhost:8080/api/sessions/MSK_portal/main_session/57167a52ef86d81afb415aba
+and
+GET http://localhost:8080/api/sessions/msk_portal/Main_Session/57167a52ef86d81afb415aba 
+are NOT equivalent.
 
 #### GET http://localhost:8080/api/sessions/{source}/{type}/query?field={field}&value={value}
 Returns all sessions matching a query for source and type. Returns
