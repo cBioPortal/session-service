@@ -86,149 +86,199 @@ session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar &
 
 ### Create
 
-#### POST http://localhost:8080/api/sessions/
-Creates a session.  Returns status 200 and session id in response body
-on success. 
-Example body for POST http://localhost:8080/api/sessions/:
+#### POST http://localhost:8080/api/sessions/{source}/{type}/
+Creates a session.  Returns status 200 and the session id in response body
+on success.  The session is saved in a collection named {type}. Both
+source and type are saved in the session document. Valid types are:
+main_session and virtual_cohort.  If a session with the same, source, type,
+and data already exist in the database returns the session id of that session
+instead of creating a duplicate.
+
+Example body for POST http://localhost:8080/api/sessions/msk_portal/msk_portal/main_session/:
 ```
-{"portal-session": "my session information"}
+{"title": "my main portal session", "description": "this is an example"}
 ```
 Example response:
 ```
 {
-  "id": "56ba6a91ef860b0c66eaef89"
+  "id": "57167a52ef86d81afb415aba"
 }
 ```
-If no JSON data passed in request body returns 400 status
+If no JSON data passed in request body or an invalid type is sent returns 400 status
 with something like the following in the body:
 ```
 {
-  "timestamp": 1455057448927,
+  "timestamp": 1461093154793,
   "status": 400,
   "error": "Bad Request",
-  "exception": "org.springframework.http.converter.HttpMessageNotReadableException",
-  "message": "Required request body is missing: public org.cbioportal.session_service.domain.Session org.cbioportal.session_service.web.SessionServiceController.addSession(java.lang.String)",
-  "path": "/api/sessions/"
+  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionInvalidException",
+  "message": "Could not save session, errors: 'valid types are: 'main_session' and 'virtual_cohort';'.",
+  "path": "/api/sessions/msk_portal/invalid_type/"
 }
 ```
 Sending invalid JSON in the request body returns a 500 status
 with something like the following in the body:
 ```
 {
-  "timestamp": 1455057586500,
+  "timestamp": 1461090997119,
   "status": 500,
   "error": "Internal Server Error",
   "exception": "com.mongodb.util.JSONParseException",
   "message": "\n{\"portal-session\": blah blah blah}\n                   ^",
-  "path": "/api/sessions/"
+  "path": "/api/sessions/msk_portal/main_session/"
 }
 ```
 
 ### Read
 
-#### GET http://localhost:8080/api/sessions/
-Returns all sessions.  Returns "[]" if no sessions.  Example response:
+#### GET http://localhost:8080/api/sessions/{source}/{type}/
+Returns all sessions for source and type.  Returns "[]" if no sessions.  Example response:
 ```
 [
   {
-    "id": "56ba6a91ef860b0c66eaef89",
+    "id": "57167a52ef86d81afb415aba",
     "data": {
-      "portal-session": "my session information"
-    }
+      "title": "my main portal session",
+      "description": "this is an example"
+    },
+    "source": "msk_portal",
+    "type": "main_session"
   },
   {
-    "id": "56ba6b40ef860b0c66eaef8a",
+    "id": "57167c69ef86fdfcec850342",
     "data": {
-      "title": "my portal session",
-      "description": "anything goes"
-    }
+      "title": "my main portal session",
+      "description": "this is another example"
+    },
+    "source": "msk_portal",
+    "type": "main_session"
   }
 ]
 ```
 
-#### GET http://localhost:8080/api/sessions/:session_id
-Returns single session with id :session_id.  
-Example response for http://localhost:8080/api/sessions/56ba6a91ef860b0c66eaef89:
+#### GET http://localhost:8080/api/sessions/{source}/{type}/{id}
+Returns single session given source, type, and id.
+Example response for http://localhost:8080/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba
 ```
 {
-  "id": "56ba6a91ef860b0c66eaef89",
+  "id": "57167a52ef86d81afb415aba",
   "data": {
-    "portal-session": "my session information"
-  }
+    "title": "my main portal session",
+    "description": "this is an example"
+  },
+  "source": "msk_portal",
+  "type": "main_session"
 }
 ```
-If an invalid :session_id is passed returns status 404 with a request body like this:
+If no session is found returns status 404 with a request body like this:
 ```
 {
-  "timestamp": 1455740248591,
+  "timestamp": 1461091785628,
   "status": 404,
   "error": "Not Found",
   "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
-  "message": "could not find session 'test'.",
-  "path": "/api/sessions/test"
+  "message": "Could not find session '0'.",
+  "path": "/api/sessions/msk_portal/main_session/0"
+}
+```
+
+#### GET http://localhost:8080/api/sessions/{source}/{type}/query?field={field}&value={value}
+Returns all sessions matching a query for source and type. Returns
+200 status on success.
+Example: http://localhost:8080/api/sessions/msk_portal/main_session/query?field=data.title&value=my%20main%20portal%20session
+```
+[
+  {
+    "id": "57167c69ef86fdfcec850342",
+    "data": {
+      "title": "my main portal session",
+      "description": "this is another example"
+    },
+    "source": "msk_portal",
+    "type": "main_session"
+  }
+]
+```
+
+If nothing is found returns a 404 status and a request body like this:
+```
+{
+  "timestamp": 1461092920408,
+  "status": 404,
+  "error": "Not Found",
+  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
+  "message": "Could not find session 'field=data.title&value=my main session'.",
+  "path": "/api/sessions/msk_portal/main_session/query"
 }
 ```
 
 ### Update
 
-#### PUT http://localhost:8080/api/sessions/:session_id
-Updates a session with id :session_id.  
-Returns 200 status on success with empty request body. 
-Example body for http://localhost:8080/api/sessions/564372de341cc1380e000001:
+#### PUT http://localhost:8080/api/sessions/{source}/{type}/{id}
+Updates a session given the source, type, and id.  Returns status 200
+on success with empty request body. 
+Example body for http://localhost:8080/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba:
 ```
-{"portal-session": "my UPDATED session information"}
+{
+    "title": "my UPDATED main portal session",
+    "description": "this is an example"
+}
 ```
 If no JSON data passed in request body returns status 400 with a request
 body like this:
 ```
 {
-  "timestamp": 1455058048734,
+  "timestamp": 1461092375741,
   "status": 400,
   "error": "Bad Request",
   "exception": "org.springframework.http.converter.HttpMessageNotReadableException",
-  "message": "Required request body is missing: public org.cbioportal.session_service.domain.Session org.cbioportal.session_service.web.SessionServiceController.updateSession(java.lang.String,java.lang.String)",
-  "path": "/api/sessions/56ba6a91ef860b0c66eaef89"
+  "message": "Required request body is missing: public void org.cbioportal.session_service.web.SessionServiceController.updateSession(java.lang.String,java.lang.String,java.lang.String,java.lang.String)",
+  "path": "/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba"
 }
 ```
-If an invalid :session_id is passed returns status 404 with a request body like this:
+If an invalid id is passed returns status 404 with a request body like this:
 ```
 {
-  "timestamp": 1455740248591,
-  "status": 404,
-  "error": "Not Found",
-  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
-  "message": "could not find session 'test'.",
-  "path": "/api/sessions/test"
+  "timestamp": 1461092405701,
+  "status": 400,
+  "error": "Bad Request",
+  "exception": "org.springframework.http.converter.HttpMessageNotReadableException",
+  "message": "Required request body is missing: public void org.cbioportal.session_service.web.SessionServiceController.updateSession(java.lang.String,java.lang.String,java.lang.String,java.lang.String)",
+  "path": "/api/sessions/msk_portal/main_session/0"
 }
 ```
 Sending invalid JSON in the request body returns a 500 status
 with something like the following in the body:
 ```
 {
-  "timestamp": 1455742301379,
+  "timestamp": 1461092440979,
   "status": 500,
   "error": "Internal Server Error",
   "exception": "com.mongodb.util.JSONParseException",
-  "message": "\n{\"portal-session\": blah blah blah}\n                     ^",
-  "path": "/api/sessions/56ba73bfef866d1ecbce19b0"
+  "message": "\n{\n    \"title\": \"my UPDATED main portal session\",\n    \"description\": blah blah blah\n}\n                                                                    ^",
+  "path": "/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba"
 }
 ```
 
 ### Delete
 
-#### DELETE http://localhost:8080/api/sessions/:session_id
-Deletes a session with id :session_id.
+#### DELETE http://localhost:8080/api/sessions/{source}/{type}/{id}
+Deletes a session with id, source, and type.
 Returns 200 status on success with empty request body. 
-Example: http://localhost:8080/api/sessions/56ba6a91ef860b0c66eaef89
+Example: http://localhost:8080/api/sessions/msk_portal/main_session/57167c69ef86fdfcec850342
 
-If an invalid :session_id is passed returns status 404 with a request body like this:
+If an invalid id is passed returns status 404 with a request body like this:
 ```
 {
-  "timestamp": 1455740248591,
+  "timestamp": 1461091373426,
   "status": 404,
   "error": "Not Found",
   "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
-  "message": "could not find session 'test'.",
-  "path": "/api/sessions/test"
+  "message": "Could not find session '0'.",
+  "path": "/api/sessions/msk_portal/main_session/0"
 }
 ```
+
+### Query
+
+
