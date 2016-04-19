@@ -176,7 +176,7 @@ public class SessionServiceTest {
         assertThat(ids.size(), equalTo(1));
         String newId = ids.get(0);
 
-        assertThat("test", equalTo(id)); 
+        assertThat(newId, equalTo(id)); 
     }
 
     @Test
