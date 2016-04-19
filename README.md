@@ -91,10 +91,10 @@ Creates a session.  Returns status 200 and the session id in response body
 on success.  The session is saved in a collection named {type}. Both
 source and type are saved in the session document. Valid types are:
 main_session and virtual_cohort.  If a session with the same source, type,
-and data already exist in the database returns the session id of that session
+and data already exists in the database returns the session id of that session
 instead of creating a duplicate.
 
-Example body for POST http://localhost:8080/api/sessions/msk_portal/msk_portal/main_session/:
+Example body for POST http://localhost:8080/api/sessions/msk_portal/msk_portal/main_session/
 ```
 {"title": "my main portal session", "description": "this is an example"}
 ```
@@ -132,7 +132,8 @@ with something like the following in the body:
 ### Read
 
 #### GET http://localhost:8080/api/sessions/{source}/{type}/
-Returns all sessions for source and type.  Returns "[]" if no sessions.  Example response:
+Returns all sessions for source and type.  Returns "[]" if no sessions.  
+Example response for GET http://localhost:8080/api/sessions/msk_portal/main_session/
 ```
 [
   {
@@ -158,7 +159,7 @@ Returns all sessions for source and type.  Returns "[]" if no sessions.  Example
 
 #### GET http://localhost:8080/api/sessions/{source}/{type}/{id}
 Returns single session given source, type, and id.
-Example response for http://localhost:8080/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba
+Example response for GET http://localhost:8080/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba
 ```
 {
   "id": "57167a52ef86d81afb415aba",
@@ -185,7 +186,7 @@ If no session is found returns status 404 with a request body like this:
 #### GET http://localhost:8080/api/sessions/{source}/{type}/query?field={field}&value={value}
 Returns all sessions matching a query for source and type. Returns
 200 status on success.
-Example: http://localhost:8080/api/sessions/msk_portal/main_session/query?field=data.title&value=my%20main%20portal%20session
+Example response for GET http://localhost:8080/api/sessions/msk_portal/main_session/query?field=data.title&value=my%20main%20portal%20session
 ```
 [
   {
@@ -217,7 +218,7 @@ If nothing is found returns a 404 status and a request body like this:
 #### PUT http://localhost:8080/api/sessions/{source}/{type}/{id}
 Updates a session given the source, type, and id.  Returns status 200
 on success with empty request body. 
-Example body for http://localhost:8080/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba:
+Example body for PUT http://localhost:8080/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba
 ```
 {
     "title": "my UPDATED main portal session",
@@ -263,9 +264,9 @@ with something like the following in the body:
 ### Delete
 
 #### DELETE http://localhost:8080/api/sessions/{source}/{type}/{id}
-Deletes a session with id, source, and type.
+Deletes a session with source, type, and id.
 Returns 200 status on success with empty request body. 
-Example: http://localhost:8080/api/sessions/msk_portal/main_session/57167c69ef86fdfcec850342
+Example URL for DELETE http://localhost:8080/api/sessions/msk_portal/main_session/57167c69ef86fdfcec850342
 
 If an invalid id is passed returns status 404 with a request body like this:
 ```
@@ -278,7 +279,3 @@ If an invalid id is passed returns status 404 with a request body like this:
   "path": "/api/sessions/msk_portal/main_session/0"
 }
 ```
-
-### Query
-
-
