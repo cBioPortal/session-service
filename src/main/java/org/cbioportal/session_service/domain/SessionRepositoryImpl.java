@@ -70,7 +70,6 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
     }
 
     public Session findOneBySourceAndTypeAndData(String source, String type, Object data) {
-        // TODO only return id field (field with 1)
         return this.mongoTemplate.findOne(
             new Query(Criteria.where("source").is(source).and("type").is(type).and("data").is(data)), 
             Session.class, type);
@@ -92,10 +91,5 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
         return this.mongoTemplate.remove(
             new Query(Criteria.where("source").is(source).and("type").is(type).and("id").is(id)),
             Session.class, type).getN();
-        /*System.out.println("LOG: write result " + result);
-        if (result != null) {
-            return (Integer) result;
-        }
-        return 0;*/
     }
 }
