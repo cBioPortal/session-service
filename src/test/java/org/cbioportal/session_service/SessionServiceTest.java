@@ -169,7 +169,8 @@ public class SessionServiceTest {
         assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
 
         // add same data to same source and type and confirm we get same id
-        response = addData("msk_portal", "main_session", data);
+        // also testing if case matters
+        response = addData("MSK_portal", "main_session", data);
 
         // get new id
         ids = parseIds(response.getBody());
