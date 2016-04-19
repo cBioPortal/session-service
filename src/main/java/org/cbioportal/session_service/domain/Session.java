@@ -64,7 +64,7 @@ public class Session
     {
         this.source = source;
         this.type = type;
-        this.setData(data); // converts to JSON
+        this.setData(data);
     }
 
     public String getId()
