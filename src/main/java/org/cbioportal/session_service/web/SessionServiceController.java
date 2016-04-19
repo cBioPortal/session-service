@@ -39,6 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.dao.DuplicateKeyException;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.ConstraintViolation;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -72,6 +75,8 @@ public class SessionServiceController
             session = sessionRepository.findOneBySourceAndTypeAndData(source, 
                 type, 
                 session.getData()); 
+        } catch (ConstraintViolationException e) {
+            throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
         }
         Map<String, String> map = new HashMap<String, String>();
         map.put("id", session.getId());
@@ -106,7 +111,11 @@ public class SessionServiceController
         Session savedSession = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (savedSession != null) {
             savedSession.setData(data);
-            sessionRepository.saveSession(savedSession);
+            try {
+                sessionRepository.saveSession(savedSession);
+            } catch (ConstraintViolationException e) {
+                throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
+            }
             return;
         }
         throw new SessionNotFoundException(id);
@@ -125,9 +134,24 @@ public class SessionServiceController
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     class SessionNotFoundException extends RuntimeException {
-
         public SessionNotFoundException(String id) {
-            super("could not find session '" + id + "'.");
+            super("Could not find session '" + id + "'.");
         }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    class SessionInvalidException extends RuntimeException {
+        public SessionInvalidException(String errors) {
+            super("Could not save session, errors: '" + errors + "'.");
+        }
+    }
+
+    private String buildConstraintViolationExceptionMessage(ConstraintViolationException e) {
+        StringBuffer errors = new StringBuffer();
+        for(ConstraintViolation violation : e.getConstraintViolations()) { 
+            errors.append(violation.getMessage());
+            errors.append(";");
+        }
+        return errors.toString();
     }
 }
