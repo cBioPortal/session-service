@@ -33,6 +33,7 @@
 package org.cbioportal.session_service.web;
 
 import org.cbioportal.session_service.domain.*;
+import org.cbioportal.session_service.domain.exception.*;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +42,13 @@ import org.springframework.dao.DuplicateKeyException;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.ConstraintViolation;
+import javax.servlet.http.HttpServletResponse;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+
+import java.io.IOException;
 
 /**
  * @author Manda Wilson 
@@ -65,7 +69,7 @@ public class SessionServiceController
     @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
     public Map<String, String> addSession(@PathVariable String source, 
         @PathVariable String type, 
-        @RequestBody String data) 
+        @RequestBody String data) throws SessionInvalidException
     { 
         Session session = new Session(source, type, data); 
         try {
@@ -95,7 +99,7 @@ public class SessionServiceController
     public Iterable<Session> getSessionsByQuery(@PathVariable String source, 
         @PathVariable String type, 
         @RequestParam(name="field") String field,
-        @RequestParam(name="value") String value)
+        @RequestParam(name="value") String value) throws SessionNotFoundException
     {
         List<Session> sessions = sessionRepository.findBySourceAndTypeAndQuery(source, type, field, value);
         if (sessions.size() != 0) {
@@ -107,7 +111,7 @@ public class SessionServiceController
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.GET)
     public Session getSession(@PathVariable String source, 
         @PathVariable String type,
-        @PathVariable String id) 
+        @PathVariable String id) throws SessionNotFoundException
     {
         Session session = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (session != null) {
@@ -120,7 +124,7 @@ public class SessionServiceController
     public void updateSession(@PathVariable String source, 
         @PathVariable String type,
         @PathVariable String id, 
-        @RequestBody String data)
+        @RequestBody String data) throws SessionNotFoundException
     {
         Session savedSession = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (savedSession != null) {
@@ -138,7 +142,7 @@ public class SessionServiceController
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.DELETE)
     public void deleteSession(@PathVariable String source, 
         @PathVariable String type,
-        @PathVariable String id)
+        @PathVariable String id) throws SessionNotFoundException
     {
         int numberDeleted = sessionRepository.deleteBySourceAndTypeAndId(source, type, id);
         if (numberDeleted != 1) { // using unique id so never more than 1 
@@ -146,23 +150,22 @@ public class SessionServiceController
         }
     } 
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    class SessionNotFoundException extends RuntimeException {
-        public SessionNotFoundException(String id) {
-            super("Could not find session '" + id + "'.");
-        }
+    @ExceptionHandler
+    void handleSessionInvalid(SessionInvalidException e, HttpServletResponse response) throws IOException
+    {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    class SessionInvalidException extends RuntimeException {
-        public SessionInvalidException(String errors) {
-            super("Could not save session, errors: '" + errors + "'.");
-        }
+    @ExceptionHandler
+    void handleSessionNotFound(SessionNotFoundException e, HttpServletResponse response) throws IOException 
+    {
+        response.sendError(HttpStatus.NOT_FOUND.value(), e.getMessage());
     }
 
-    private String buildConstraintViolationExceptionMessage(ConstraintViolationException e) {
+    private String buildConstraintViolationExceptionMessage(ConstraintViolationException e) 
+    {
         StringBuffer errors = new StringBuffer();
-        for(ConstraintViolation violation : e.getConstraintViolations()) { 
+        for (ConstraintViolation violation : e.getConstraintViolations()) { 
             errors.append(violation.getMessage());
             errors.append(";");
         }
