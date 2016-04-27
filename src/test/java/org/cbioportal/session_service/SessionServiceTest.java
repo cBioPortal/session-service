@@ -229,7 +229,7 @@ public class SessionServiceTest {
     @Test
     public void getSessionInvalidId() throws Exception {
         ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "id", String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
@@ -316,7 +316,7 @@ public class SessionServiceTest {
     public void updateSessionInvalidId() throws Exception {
         HttpEntity<String> entity = prepareData("\"portal-session\":\"my session information\"");
         ResponseEntity<String> response = template.exchange(base.toString() + "msk_portal/main_session/id", HttpMethod.PUT, entity, String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
@@ -359,14 +359,14 @@ public class SessionServiceTest {
 
         // confirm record is gone
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
     public void deleteSessionInvalidId() throws Exception {
         ResponseEntity<String> response = template.exchange(base.toString() + "msk_portal/main_session/id", HttpMethod.DELETE, null, String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
