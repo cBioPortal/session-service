@@ -145,8 +145,8 @@ public class SessionServiceTest {
     @Test
     public void addSessionInvalidData() throws Exception {
         ResponseEntity<String> response = addData("msk_portal", "main_session", "\"portal-session\":blah blah blah"); 
-        assertThat(response.getBody(), containsString("com.mongodb.util.JSONParseException"));
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionInvalidException"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
@@ -308,8 +308,8 @@ public class SessionServiceTest {
 
         HttpEntity<String> entity = prepareData("\"portal-session\":blah blah blah");
         response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.PUT, entity, String.class);
-        assertThat(response.getBody(), containsString("com.mongodb.util.JSONParseException"));
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionInvalidException"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test

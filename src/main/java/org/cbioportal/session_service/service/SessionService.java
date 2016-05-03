@@ -30,33 +30,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.session_service;
+package org.cbioportal.session_service.service;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
-import org.springframework.data.mongodb.core.mapping.event.ValidatingMongoEventListener;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.context.annotation.Bean;
+import org.cbioportal.session_service.domain.Session;
+import org.cbioportal.session_service.domain.exception.*;
 
+import java.util.List;
 
 /**
- * @author Manda Wilson 
- */
-@SpringBootApplication // shorthand for @Configuration, @EnableAutoConfiguration, @ComponentScan
-public class SessionService extends SpringBootServletInitializer {
-
-    @Bean
-    public ValidatingMongoEventListener validatingMongoEventListener() {
-        return new ValidatingMongoEventListener(validator());
-    }
-
-    @Bean
-    public LocalValidatorFactoryBean validator() {
-        return new LocalValidatorFactoryBean();
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(SessionService.class, args);
-    }
+* @author Manda Wilson 
+*/
+public interface SessionService {
+    Session addSession(String source, String type, String data) throws SessionInvalidException;
+    List<Session> getSessions(String source, String type);
+    List<Session> getSessionsByQuery(String source, String type, String field, String value) throws SessionNotFoundException;
+    Session getSession(String source, String type, String id) throws SessionNotFoundException;
+    void updateSession(String source, String type, String id, String data) throws SessionInvalidException, 
+        SessionNotFoundException;
+    void deleteSession(String source, String type, String id) throws SessionNotFoundException;
 }
