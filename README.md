@@ -114,19 +114,19 @@ with something like the following in the body:
   "timestamp": 1461093154793,
   "status": 400,
   "error": "Bad Request",
-  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionInvalidException",
-  "message": "Could not save session, errors: 'valid types are: 'main_session' and 'virtual_cohort';'.",
+  "exception": "org.cbioportal.session_service.domain.exception.SessionInvalidException",
+  "message": "valid types are: 'main_session' and 'virtual_cohort';",
   "path": "/api/sessions/msk_portal/invalid_type/"
 }
 ```
-Sending invalid JSON in the request body returns a 500 status
+Sending invalid JSON in the request body returns a 400 status
 with something like the following in the body:
 ```
 {
   "timestamp": 1461090997119,
-  "status": 500,
-  "error": "Internal Server Error",
-  "exception": "com.mongodb.util.JSONParseException",
+  "status": 400,
+  "error": "Bad Request",
+  "exception": "org.cbioportal.session_service.domain.exception.SessionInvalidException",
   "message": "\n{\"portal-session\": blah blah blah}\n                   ^",
   "path": "/api/sessions/msk_portal/main_session/"
 }
@@ -256,14 +256,14 @@ If an invalid id is passed returns status 404 with a request body like this:
   "path": "/api/sessions/msk_portal/main_session/0"
 }
 ```
-Sending invalid JSON in the request body returns a 500 status
+Sending invalid JSON in the request body returns a 400 status
 with something like the following in the body:
 ```
 {
   "timestamp": 1461092440979,
-  "status": 500,
-  "error": "Internal Server Error",
-  "exception": "com.mongodb.util.JSONParseException",
+  "status": 400,
+  "error": "Bad Request",
+  "exception": "org.cbioportal.session_service.domain.exception.SessionInvalidException",
   "message": "\n{\n    \"title\": \"my UPDATED main portal session\",\n    \"description\": blah blah blah\n}\n                                                                    ^",
   "path": "/api/sessions/msk_portal/main_session/57167a52ef86d81afb415aba"
 }
