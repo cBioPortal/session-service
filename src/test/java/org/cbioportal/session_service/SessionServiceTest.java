@@ -145,7 +145,7 @@ public class SessionServiceTest {
     @Test
     public void addSessionInvalidData() throws Exception {
         ResponseEntity<String> response = addData("msk_portal", "main_session", "\"portal-session\":blah blah blah"); 
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionInvalidException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionInvalidException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -229,7 +229,7 @@ public class SessionServiceTest {
     @Test
     public void getSessionInvalidId() throws Exception {
         ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "id", String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
@@ -254,7 +254,7 @@ public class SessionServiceTest {
         // now query
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=data.p\0ortal-session.title&value=my portal session", String.class);
         assertThat(response.getBody(), containsString("Document field names can't have a NULL character"));
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
@@ -266,7 +266,7 @@ public class SessionServiceTest {
         // now query
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=$data.portal-session.title&value=my portal session", String.class);
         assertThat(response.getBody(), containsString("Can't canonicalize query"));
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
@@ -308,7 +308,7 @@ public class SessionServiceTest {
 
         HttpEntity<String> entity = prepareData("\"portal-session\":blah blah blah");
         response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.PUT, entity, String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionInvalidException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionInvalidException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -316,7 +316,7 @@ public class SessionServiceTest {
     public void updateSessionInvalidId() throws Exception {
         HttpEntity<String> entity = prepareData("\"portal-session\":\"my session information\"");
         ResponseEntity<String> response = template.exchange(base.toString() + "msk_portal/main_session/id", HttpMethod.PUT, entity, String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
@@ -359,14 +359,14 @@ public class SessionServiceTest {
 
         // confirm record is gone
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
     public void deleteSessionInvalidId() throws Exception {
         ResponseEntity<String> response = template.exchange(base.toString() + "msk_portal/main_session/id", HttpMethod.DELETE, null, String.class);
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.domain.exception.SessionNotFoundException"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
