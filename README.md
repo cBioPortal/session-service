@@ -236,12 +236,12 @@ body like this:
 If an invalid id is passed returns status 404 with a request body like this:
 ```
 {
-  "timestamp": 1461092405701,
-  "status": 400,
-  "error": "Bad Request",
-  "exception": "org.springframework.http.converter.HttpMessageNotReadableException",
-  "message": "Required request body is missing: public void org.cbioportal.session_service.web.SessionServiceController.updateSession(java.lang.String,java.lang.String,java.lang.String,java.lang.String)",
-  "path": "/api/sessions/msk_portal/main_session/0"
+  "timestamp": 1462379078498,
+  "status": 404,
+  "error": "Not Found",
+  "exception": "org.cbioportal.session_service.service.exception.SessionNotFoundException",
+  "message": "Session not found",
+  "path": "/api/sessions/msk_portal/main_session/test"
 }
 ```
 Sending invalid JSON in the request body returns a 400 status
