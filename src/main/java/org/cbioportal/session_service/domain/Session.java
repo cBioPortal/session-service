@@ -38,13 +38,16 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
 /**
-* @author Manda Wilson 
-*/
-public class Session
-{
+ * @author Manda Wilson 
+ */
+@JsonInclude(Include.NON_NULL)
+public class Session {
     @Id
     private String id;
     @NotNull
@@ -56,55 +59,44 @@ public class Session
     @Pattern(regexp="main_session|virtual_cohort", message="valid types are: 'main_session' and 'virtual_cohort'")
     private String type;
 
-    private Session() 
-    {
-    }
+    private Session() {}
 
-    public Session(String source, String type, String data)
-    {
+    public Session(String source, String type, String data) {
         this.source = source;
         this.type = type;
         this.setData(data);
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setData(String data)
-    {
+    public void setData(String data) {
         this.data = JSON.parse(data);
     }
 
-    public Object getData()
-    {
+    public Object getData() {
         return data;
     }
 
-    public void setType(String type)
-    {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
-    public void setSource(String source)
-    {
+    public void setSource(String source) {
         this.source = source;
     }
 
-    public String getSource()
-    {
+    public String getSource() {
         return source;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return data.toString();
     }
 }
