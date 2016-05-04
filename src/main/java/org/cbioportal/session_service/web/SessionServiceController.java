@@ -33,8 +33,7 @@
 package org.cbioportal.session_service.web;
 
 import org.cbioportal.session_service.domain.*;
-import org.cbioportal.session_service.domain.exception.*;
-
+import org.cbioportal.session_service.service.exception.*;
 import org.cbioportal.session_service.service.SessionService;
 
 import org.springframework.web.bind.annotation.*;
@@ -42,9 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import javax.servlet.http.HttpServletResponse;
-
-import java.util.Map;
-import java.util.HashMap;
 
 import java.io.IOException;
 
@@ -59,13 +55,10 @@ public class SessionServiceController {
     private SessionService sessionService;
 
     @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
-    public Map<String, String> addSession(@PathVariable String source, 
+    public Session addSession(@PathVariable String source, 
         @PathVariable String type, 
         @RequestBody String data) { 
-        Session session = sessionService.addSession(source, type, data);
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("id", session.getId());
-        return map;
+        return sessionService.addSession(source, type, data);
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
@@ -106,6 +99,12 @@ public class SessionServiceController {
 
     @ExceptionHandler
     public void handleSessionInvalid(SessionInvalidException e, HttpServletResponse response) 
+        throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+
+    @ExceptionHandler
+    public void handleSessionQueryInvalid(SessionQueryInvalidException e, HttpServletResponse response) 
         throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
