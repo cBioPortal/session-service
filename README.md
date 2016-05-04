@@ -267,11 +267,11 @@ Example URL for DELETE http://localhost:8080/api/sessions/msk_portal/main_sessio
 If an invalid id is passed returns status 404 with a request body like this:
 ```
 {
-  "timestamp": 1461091373426,
+  "timestamp": 1462379146105,
   "status": 404,
   "error": "Not Found",
-  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
-  "message": "Could not find session '0'.",
-  "path": "/api/sessions/msk_portal/main_session/0"
+  "exception": "org.cbioportal.session_service.service.exception.SessionNotFoundException",
+  "message": "Session not found",
+  "path": "/api/sessions/msk_portal/main_session/test"
 }
 ```
