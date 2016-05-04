@@ -177,12 +177,12 @@ Example response for GET http://localhost:8080/api/sessions/msk_portal/main_sess
 If no session is found returns status 404 with a request body like this:
 ```
 {
-  "timestamp": 1461091785628,
+  "timestamp": 1462379207301,
   "status": 404,
   "error": "Not Found",
-  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
-  "message": "Could not find session '0'.",
-  "path": "/api/sessions/msk_portal/main_session/0"
+  "exception": "org.cbioportal.session_service.service.exception.SessionNotFoundException",
+  "message": "Session not found",
+  "path": "/api/sessions/msk_portal/main_session/test"
 }
 ```
 WARNING: This is case sensitive.
