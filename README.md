@@ -6,7 +6,7 @@ Session information is stored in JSON, so this API generalizes to any JSON objec
 
 ### Requirements
 
-JDK 1.8 or later: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+JDK 1.7 or later: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 Maven 3.0+: http://maven.apache.org/download.cgi
 
@@ -207,18 +207,6 @@ Example response for GET http://localhost:8080/api/sessions/msk_portal/main_sess
     "type": "main_session"
   }
 ]
-```
-
-If nothing is found returns a 404 status and a request body like this:
-```
-{
-  "timestamp": 1461092920408,
-  "status": 404,
-  "error": "Not Found",
-  "exception": "org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException",
-  "message": "Could not find session 'field=data.title&value=my main session'.",
-  "path": "/api/sessions/msk_portal/main_session/query"
-}
 ```
 
 ### Update
