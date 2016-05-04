@@ -33,17 +33,17 @@
 package org.cbioportal.session_service.service;
 
 import org.cbioportal.session_service.domain.Session;
-import org.cbioportal.session_service.domain.exception.*;
+import org.cbioportal.session_service.service.exception.*;
 
 import java.util.List;
 
 /**
-* @author Manda Wilson 
-*/
+ * @author Manda Wilson 
+ */
 public interface SessionService {
     Session addSession(String source, String type, String data) throws SessionInvalidException;
     List<Session> getSessions(String source, String type);
-    List<Session> getSessionsByQuery(String source, String type, String field, String value) throws SessionNotFoundException;
+    List<Session> getSessionsByQuery(String source, String type, String field, String value);
     Session getSession(String source, String type, String id) throws SessionNotFoundException;
     void updateSession(String source, String type, String id, String data) throws SessionInvalidException, 
         SessionNotFoundException;
