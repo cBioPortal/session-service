@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
@@ -55,6 +57,7 @@ public class SessionServiceController {
     private SessionService sessionService;
 
     @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
+    @JsonView(Session.Views.IdOnly.class)
     public Session addSession(@PathVariable String source, 
         @PathVariable String type, 
         @RequestBody String data) { 
@@ -62,12 +65,14 @@ public class SessionServiceController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
+    @JsonView(Session.Views.Full.class)
     public Iterable<Session> getSessions(@PathVariable String source, 
         @PathVariable String type) {
         return sessionService.getSessions(source, type);
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}/query")
+    @JsonView(Session.Views.Full.class)
     public Iterable<Session> getSessionsByQuery(@PathVariable String source, 
         @PathVariable String type, 
         @RequestParam(name="field") String field,
@@ -76,6 +81,7 @@ public class SessionServiceController {
     }
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.GET)
+    @JsonView(Session.Views.Full.class)
     public Session getSession(@PathVariable String source, 
         @PathVariable String type,
         @PathVariable String id) {

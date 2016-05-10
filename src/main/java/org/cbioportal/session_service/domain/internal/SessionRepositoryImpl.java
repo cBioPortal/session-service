@@ -71,9 +71,7 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
     }
 
     public Session findOneBySourceAndTypeAndData(String source, String type, Object data) {
-        // this only returns id in session object
         Query query = new Query(Criteria.where("source").is(source).and("type").is(type).and("data").is(data));
-        query.fields().include("_id");
         return this.mongoTemplate.findOne(query, Session.class, type);
     }
 

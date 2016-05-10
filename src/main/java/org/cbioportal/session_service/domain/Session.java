@@ -40,6 +40,7 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
@@ -67,6 +68,7 @@ public class Session {
         this.setData(data);
     }
 
+    @JsonView(Session.Views.IdOnly.class)
     public String getId() {
         return id;
     }
@@ -75,6 +77,7 @@ public class Session {
         this.data = JSON.parse(data);
     }
 
+    @JsonView(Session.Views.Full.class)
     public Object getData() {
         return data;
     }
@@ -83,6 +86,7 @@ public class Session {
         this.type = type;
     }
 
+    @JsonView(Session.Views.Full.class)
     public String getType() {
         return type;
     }
@@ -91,6 +95,7 @@ public class Session {
         this.source = source;
     }
 
+    @JsonView(Session.Views.Full.class)
     public String getSource() {
         return source;
     }
@@ -98,5 +103,13 @@ public class Session {
     @Override
     public String toString() {
         return data.toString();
+    }
+
+    public static final class Views {
+        // show only id
+        public interface IdOnly {}
+
+        // show all data
+        public interface Full extends IdOnly {}
     }
 }
