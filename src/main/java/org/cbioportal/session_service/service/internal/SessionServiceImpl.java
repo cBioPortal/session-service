@@ -66,8 +66,6 @@ public class SessionServiceImpl implements SessionService {
             session = new Session(source, type, data);
             sessionRepository.saveSession(session);
         } catch (DuplicateKeyException e) {
-            // find session and return it
-            // need the JSON object data, not the string passed
             session = sessionRepository.findOneBySourceAndTypeAndData(source,
                 type,
                 session.getData());
