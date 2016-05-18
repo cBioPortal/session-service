@@ -63,7 +63,7 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
             DBObject indexKeys = new BasicDBObject();
             indexKeys.put("source", 1);
             indexKeys.put("type", 1);
-            indexKeys.put("data", 1);
+            indexKeys.put("checksum", 1);
             this.mongoTemplate.indexOps(session.getType()).ensureIndex(
                 new CompoundIndexDefinition(indexKeys).unique());
         } 
