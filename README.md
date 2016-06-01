@@ -84,6 +84,8 @@ session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar &
 
 ## API
 
+Swagger documentation will be found here: http://[url]:[port]/swagger-ui.html e.g. http://localhost:8090/swagger-ui.html
+
 ### Create
 
 #### POST http://localhost:8080/api/sessions/{source}/{type}/
