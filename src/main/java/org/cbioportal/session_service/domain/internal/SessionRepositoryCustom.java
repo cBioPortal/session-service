@@ -30,15 +30,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.session_service.domain;
+package org.cbioportal.session_service.domain.internal;
 
-import org.cbioportal.session_service.domain.internal.SessionRepositoryCustom;
- 
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
+import org.cbioportal.session_service.domain.Session;
+
+import java.util.List;
 
 /**
  * @author Manda Wilson 
  */
-public interface SessionRepository 
-    extends MongoRepository<Session, String>, SessionRepositoryCustom {}
+public interface SessionRepositoryCustom {
+
+    void saveSession(Session session);
+
+    Session findOneBySourceAndTypeAndData(String source, String type, Object data);
+
+    Session findOneBySourceAndTypeAndId(String source, String type, String id);
+
+    List<Session> findBySourceAndType(String source, String type);
+
+    int deleteBySourceAndTypeAndId(String source, String type, String id);
+
+    List<Session> findBySourceAndTypeAndQuery(String source, String type, String field, String value);
+
+}

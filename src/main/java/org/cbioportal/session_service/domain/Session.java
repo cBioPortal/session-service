@@ -33,45 +33,93 @@
 package org.cbioportal.session_service.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.util.DigestUtils;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonView;
+
 
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
 /**
-* @author Manda Wilson 
-*/
-public class Session
-{
+ * @author Manda Wilson 
+ */
+@JsonInclude(Include.NON_NULL)
+public class Session {
     @Id
     private String id;
+    @NotNull
+    private String checksum;
+    @NotNull
     private Object data;
+    @NotNull
+    @Size(min=3, message="source has a minimum length of 3")
+    private String source;
+    @NotNull
+    @Pattern(regexp="main_session|virtual_cohort", message="valid types are: 'main_session' and 'virtual_cohort'")
+    private String type;
 
-    public Session() 
-    {
+    private Session() {}
+
+    public Session(String source, String type, String data) {
+        this.source = source;
+        this.type = type;
+        this.setData(data);
     }
 
-    public Session(String data)
-    {
-        this.data = JSON.parse(data);
-    }
-
-    public String getId()
-    {
+    @JsonView(Session.Views.IdOnly.class)
+    public String getId() {
         return id;
     }
 
-    public void setData(String data)
-    {
-        this.data = JSON.parse(data);
+    public String getChecksum() {
+        return checksum;
     }
 
-    public Object getData()
-    {
+    public void setData(String data) {
+        this.data = JSON.parse(data);
+        // JSON.serialize it so that formatting is the same if we test later
+        this.checksum = DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
+    }
+
+    @JsonView(Session.Views.Full.class)
+    public Object getData() {
         return data;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @JsonView(Session.Views.Full.class)
+    public String getType() {
+        return type;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    @JsonView(Session.Views.Full.class)
+    public String getSource() {
+        return source;
+    }
+
     @Override
-    public String toString()
-    {
+    public String toString() {
         return data.toString();
+    }
+
+    public static final class Views {
+        // show only id
+        public interface IdOnly {}
+
+        // show all data
+        public interface Full extends IdOnly {}
     }
 }

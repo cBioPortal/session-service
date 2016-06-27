@@ -30,15 +30,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.session_service.domain;
+package org.cbioportal.session_service.service;
 
-import org.cbioportal.session_service.domain.internal.SessionRepositoryCustom;
- 
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
+import org.cbioportal.session_service.domain.Session;
+import org.cbioportal.session_service.service.exception.*;
+
+import java.util.List;
 
 /**
  * @author Manda Wilson 
  */
-public interface SessionRepository 
-    extends MongoRepository<Session, String>, SessionRepositoryCustom {}
+public interface SessionService {
+    Session addSession(String source, String type, String data) throws SessionInvalidException;
+    List<Session> getSessions(String source, String type);
+    List<Session> getSessionsByQuery(String source, String type, String field, String value);
+    Session getSession(String source, String type, String id) throws SessionNotFoundException;
+    void updateSession(String source, String type, String id, String data) throws SessionInvalidException, 
+        SessionNotFoundException;
+    void deleteSession(String source, String type, String id) throws SessionNotFoundException;
+}

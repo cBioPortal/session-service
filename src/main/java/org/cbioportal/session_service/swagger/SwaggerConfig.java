@@ -30,15 +30,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.session_service.domain;
+package org.cbioportal.session_service.swagger;
 
-import org.cbioportal.session_service.domain.internal.SessionRepositoryCustom;
- 
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
 
-/**
- * @author Manda Wilson 
- */
-public interface SessionRepository 
-    extends MongoRepository<Session, String>, SessionRepositoryCustom {}
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.service.ApiInfo;
+
+@Configuration
+@EnableSwagger2
+public class SwaggerConfig {
+    @Bean
+    public Docket api() { 
+        return new Docket(DocumentationType.SWAGGER_2) 
+            .select()
+            .apis(RequestHandlerSelectors.basePackage("org.cbioportal.session_service.web"))
+            .build()
+            .pathMapping("/api")
+            .apiInfo(apiInfo()); 
+    }
+
+    private ApiInfo apiInfo() {
+        ApiInfo apiInfo = new ApiInfo(
+            "cBioPortal session-service API", 
+            "RESTful API to access cBioPortal/cbioportal sessions in MongoDB.", 
+            "1.0 (beta)",
+            "www.cbioportal.org",
+            "cbioportal@googlegroups.com", 
+            "License", 
+            "https://github.com/cBioPortal/cbioportal/blob/master/LICENSE");
+        return apiInfo;
+    }
+}

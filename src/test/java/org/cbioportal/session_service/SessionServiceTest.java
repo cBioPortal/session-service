@@ -82,16 +82,16 @@ public class SessionServiceTest {
     @After
     public void tearDown() throws Exception {
         // get all and delete them
-        ResponseEntity<String> response = template.getForEntity(base.toString(), String.class);
+        ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session/", String.class);
         List<String> ids = parseIds(response.getBody());
         for (String id : ids) { 
-			template.delete(base.toString() + id);
+			template.delete(base.toString() + "msk_portal/main_session/" + id);
 		}
     }
 
     @Test
     public void getSessionsNoData() throws Exception {
-        ResponseEntity<String> response = template.getForEntity(base.toString(), String.class);
+        ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session/", String.class);
         assertThat(response.getBody(), equalTo("[]"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }
@@ -100,11 +100,11 @@ public class SessionServiceTest {
     public void getSessionsData() throws Exception {
         // first add data
         String data = "\"portal-session\":\"my session information\"";
-        ResponseEntity<String> response = addData(data);
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
-        // now test data is returned by GET /api/sessions/
-        response = template.getForEntity(base.toString(), String.class);
-        assertThat(expectedResponse(response.getBody(), data, true), equalTo(true)); 
+        // now test data is returned by GET /api/sessions/source/type/
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/", String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data, true), equalTo(true)); 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }
     
@@ -112,40 +112,108 @@ public class SessionServiceTest {
     public void addSession() throws Exception {
         // add data
         String data = "\"portal-session\":\"my session information\"";
-        ResponseEntity<String> response = addData(data);
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
-        // test that we get the db record back and that the status was 200 
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        // test that the status was 200 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+
+        // get id
+        List<String> ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String id = ids.get(0);
+
+        // get record
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
     }
 
     @Test
     public void addSessionNoData() throws Exception {
         // add {} actually works TODO decide if it should
         String data = "";
-        ResponseEntity<String> response = addData(data);
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
-        // test that we get the db record back and that the status was 200 
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        // test that we get an id back and that the status was 200 
+        assertThat(response.getBody(), containsString("id"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
        
-        response = addData(null); 
+        response = addData("msk_portal", "main_session", null); 
         assertThat(response.getBody(), containsString("Required request body is missing"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
     public void addSessionInvalidData() throws Exception {
-        ResponseEntity<String> response = addData("\"portal-session\":blah blah blah"); 
-        assertThat(response.getBody(), containsString("com.mongodb.util.JSONParseException"));
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
+        ResponseEntity<String> response = addData("msk_portal", "main_session", "\"portal-session\":blah blah blah"); 
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionInvalidException"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void addSessionInvalidType() throws Exception {
+        ResponseEntity<String> response = addData("msk_portal", "invalid_type", "\"portal-session\":\"blah blah blah\""); 
+        assertThat(response.getBody(), containsString("valid types are: 'main_session' and 'virtual_cohort'"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void addSessionUniqueness() throws Exception {
+        // add data
+        String data = "\"portal-session\":\"my session information\"";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
+
+        // test that the status was 200 
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+
+        // get id
+        List<String> ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String id = ids.get(0);
+
+        // get record
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
+
+        // add same data to same source and type and confirm we get same id
+        response = addData("msk_portal", "main_session", data);
+
+        // get new id
+        ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String newId = ids.get(0);
+
+        // make sure we got the same id
+        assertThat(newId, equalTo(id));
+
+        // now test with a different source, and make sure we get a different id 
+        response = addData("other_portal", "main_session", data);
+
+        // get new id
+        ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String differentId = ids.get(0);
+
+        // make sure we got the same id
+        assertThat(differentId, is(not(equalTo(id))));
+
+        // confirm this is case sensitive
+        response = addData("MSK_portal", "main_session", data);
+
+        // get new id
+        ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        differentId = ids.get(0);
+
+        // make sure we got a new id
+        assertThat(differentId, is(not(equalTo(id))));
+
     }
 
     @Test
     public void getSession() throws Exception {
         // first add data
         String data = "\"portal-session\":{\"arg1\":\"first argument\"}";
-        ResponseEntity<String> response = addData(data);
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
         // get id
         List<String> ids = parseIds(response.getBody());
@@ -153,36 +221,77 @@ public class SessionServiceTest {
         String id = ids.get(0);
 
         // now test data is returned by GET /api/sessions/[ID]
-        response = template.getForEntity(base.toString() + id, String.class);
-        System.out.println("getSession response body = " + response.getBody());
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }
 
     @Test
     public void getSessionInvalidId() throws Exception {
-        ResponseEntity<String> response = template.getForEntity(base.toString() + "id", String.class);
-        System.out.println("getSession response body = " + response.getBody());
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "id", String.class);
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
+    }
+
+    @Test
+    public void getSessionWithQuery() throws Exception {
+        // first add data
+        String data = "\"portal-session\":{\"title\":\"my portal session\"}";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
+
+        // now query
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=data.portal-session.title&value=my portal session", String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data, true), equalTo(true)); 
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+    }
+
+    @Test
+    public void getSessionWithQueryNullCharacterInField() throws Exception {
+        // first add data
+        String data = "\"portal-session\":{\"title\":\"my portal session\"}";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
+
+        // now query
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=data.p\0ortal-session.title&value=my portal session", String.class);
+        assertThat(response.getBody(), containsString("Document field names can't have a NULL character"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void getSessionWithQueryFieldStartsWithDollarSign() throws Exception {
+        // first add data
+        String data = "\"portal-session\":{\"title\":\"my portal session\"}";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
+
+        // now query
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=$data.portal-session.title&value=my portal session", String.class);
+        assertThat(response.getBody(), containsString("Can't canonicalize query"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
     public void updateSession() throws Exception {
         String data = "\"portal-session\":\"my session information\"";
-        ResponseEntity<String> response = addData(data);
-        System.out.println("MEW: updateSession() response body = " + response.getBody());
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
         // get id
         List<String> ids = parseIds(response.getBody());
         assertThat(ids.size(), equalTo(1));
         String id = ids.get(0);
 
+        // get record
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
+
+        // update record
         data = "\"portal-session\":\"my session UPDATED information\"";
         HttpEntity<String> entity = prepareData(data);
-        response = template.exchange(base.toString() + id, HttpMethod.PUT, entity, String.class);
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.PUT, entity, String.class);
+        assertThat(response.getBody(), equalTo(null)); 
+
+        // get updated record
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
         assertThat(response.getBody(), containsString("UPDATED"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }
@@ -190,7 +299,7 @@ public class SessionServiceTest {
     @Test
     public void updateSessionInvalidData() throws Exception {
         String data = "\"portal-session\":{\"arg1\":\"first argument\"}";
-        ResponseEntity<String> response = addData(data);
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
         // get id
         List<String> ids = parseIds(response.getBody());
@@ -198,24 +307,23 @@ public class SessionServiceTest {
         String id = ids.get(0);
 
         HttpEntity<String> entity = prepareData("\"portal-session\":blah blah blah");
-        response = template.exchange(base.toString() + id, HttpMethod.PUT, entity, String.class);
-        assertThat(response.getBody(), containsString("com.mongodb.util.JSONParseException"));
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.INTERNAL_SERVER_ERROR));
+        response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.PUT, entity, String.class);
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionInvalidException"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
     public void updateSessionInvalidId() throws Exception {
         HttpEntity<String> entity = prepareData("\"portal-session\":\"my session information\"");
-        ResponseEntity<String> response = template.exchange(base.toString() + "id", HttpMethod.PUT, entity, String.class);
-        System.out.println("getSession response body = " + response.getBody());
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        ResponseEntity<String> response = template.exchange(base.toString() + "msk_portal/main_session/id", HttpMethod.PUT, entity, String.class);
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
     public void updateSessionNoData() throws Exception {
         String data = "\"portal-session\":\"my session information\"";
-        ResponseEntity<String> response = addData(data);
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
         // get id
         List<String> ids = parseIds(response.getBody());
@@ -223,7 +331,7 @@ public class SessionServiceTest {
         String id = ids.get(0);
 
         HttpEntity<String> entity = prepareData(null);
-        response = template.exchange(base.toString() + id, HttpMethod.PUT, entity, String.class);
+        response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.PUT, entity, String.class);
 
         assertThat(response.getBody(), containsString("Required request body is missing"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
@@ -233,34 +341,60 @@ public class SessionServiceTest {
     public void deleteSession() throws Exception {
         // first add data
         String data = "\"portal-session\":{\"arg1\":\"first argument\"}";
-        ResponseEntity<String> response = addData(data);
-        assertThat(expectedResponse(response.getBody(), data), equalTo(true)); 
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
         // get id
         List<String> ids = parseIds(response.getBody());
         assertThat(ids.size(), equalTo(1));
         String id = ids.get(0);
 
+        // get record from database
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
+
         // delete
-        response = template.exchange(base.toString() + id, HttpMethod.DELETE, null, String.class);
+        response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.DELETE, null, String.class);
         assertThat(response.getBody(), equalTo(null)); 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
 
         // confirm record is gone
-        response = template.getForEntity(base.toString() + id, String.class);
-        System.out.println("getSession response body = " + response.getBody());
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
     public void deleteSessionInvalidId() throws Exception {
-        ResponseEntity<String> response = template.exchange(base.toString() + "id", HttpMethod.DELETE, null, String.class);
-        System.out.println("getSession response body = " + response.getBody());
-        assertThat(response.getBody(), containsString("org.cbioportal.session_service.web.SessionServiceController$SessionNotFoundException"));
+        ResponseEntity<String> response = template.exchange(base.toString() + "msk_portal/main_session/id", HttpMethod.DELETE, null, String.class);
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionNotFoundException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
+    @Test
+    public void deleteSessionValidIdWrongSource() throws Exception {
+        // first add data
+        String data = "\"portal-session\":{\"arg1\":\"first argument\"}";
+        ResponseEntity<String> response = addData("msk_portal", "virtual_cohort", data);
+
+        // get id
+        List<String> ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String id = ids.get(0);
+
+        // get record from database
+        response = template.getForEntity(base.toString() + "msk_portal/virtual_cohort/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "virtual_cohort", data), equalTo(true)); 
+
+        // delete with different source
+        response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.DELETE, null, String.class);
+        assertThat(response.getBody(), containsString("SessionNotFoundException"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
+
+        // delete with correct source
+        response = template.exchange(base.toString() + "msk_portal/virtual_cohort/" + id, HttpMethod.DELETE, null, String.class);
+        assertThat(response.getBody(), equalTo(null)); 
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+    }
 
     private HttpEntity<String> prepareData(String data) throws Exception {
         HttpHeaders headers = new HttpHeaders();
@@ -271,31 +405,35 @@ public class SessionServiceTest {
         return new HttpEntity<String>(data, headers);
     }
 
-    private ResponseEntity<String> addData(String data) throws Exception {
+    private ResponseEntity<String> addData(String source, String type, String data) throws Exception {
         HttpEntity<String> entity = prepareData(data);
-        return template.exchange(base.toString(), HttpMethod.POST, entity, String.class);
+        return template.exchange(base.toString() + source + "/" + type + "/", HttpMethod.POST, entity, String.class);
     }
 
     /*
      * plural is false.
      */
-    private boolean expectedResponse(String responseBody, String data) throws Exception {
-        return expectedResponse(responseBody, data, false);
+    private boolean expectedResponse(String responseBody, 
+            String source,
+            String type,
+            String data) throws Exception {
+        return expectedResponse(responseBody, source, type, data, false);
     }
 
-    private boolean expectedResponse(String responseBody, String data, boolean plural) throws Exception {
+    private boolean expectedResponse(String responseBody, 
+            String source,
+            String type,
+            String data, 
+            boolean plural) throws Exception {
         // { and } are special characters in regexes, but also used in JSON so we need to escape them
-        System.out.println("MEW: data = " + data);
         data = data.replaceAll("\\{", "\\\\{");
         data = data.replaceAll("\\}", "\\\\}");
-        System.out.println("MEW: data = " + data);
-        String pattern = "\\{\"id\":\"([^\"]+)\",\"data\":\\{" + data + "\\}\\}";
+        String pattern = "\\{\"id\":\"([^\"]+)\",\"data\":\\{" 
+            + data + "\\},\"source\":\"" + source + "\",\"type\":\"" + type + "\"\\}";
         if (plural) {
             pattern = "\\[" + pattern + "\\]";
         }
         pattern = "^" + pattern + "$";
-        System.out.println("MEW: pattern = " + pattern);
-        System.out.println("MEW: responseBody = " + responseBody);
         Pattern expectedResponsePattern = Pattern.compile(pattern);
         Matcher responseMatcher = expectedResponsePattern.matcher(responseBody);
         return responseMatcher.matches();
@@ -304,10 +442,8 @@ public class SessionServiceTest {
     private List<String> parseIds(String json) throws Exception {
         Pattern idPattern = Pattern.compile("\"id\":\"([^\"]+)\"");
         Matcher idMatcher = idPattern.matcher(json);
-        System.out.println("MEW: " + json);
         List<String> ids = new ArrayList<String>();
         while (idMatcher.find()) {
-            System.out.println("MEW: " + idMatcher.group(1));
             ids.add(idMatcher.group(1));
         }
         return ids;

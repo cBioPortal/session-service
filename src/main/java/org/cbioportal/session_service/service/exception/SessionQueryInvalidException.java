@@ -30,15 +30,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.session_service.domain;
+package org.cbioportal.session_service.service.exception;
 
-import org.cbioportal.session_service.domain.internal.SessionRepositoryCustom;
- 
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
-
-/**
- * @author Manda Wilson 
- */
-public interface SessionRepository 
-    extends MongoRepository<Session, String>, SessionRepositoryCustom {}
+public class SessionQueryInvalidException extends RuntimeException {
+    public SessionQueryInvalidException(String message) {
+        super(message);
+    }   
+}   

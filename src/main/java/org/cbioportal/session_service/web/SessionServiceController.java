@@ -33,78 +33,89 @@
 package org.cbioportal.session_service.web;
 
 import org.cbioportal.session_service.domain.*;
+import org.cbioportal.session_service.service.exception.*;
+import org.cbioportal.session_service.service.SessionService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 
 /**
  * @author Manda Wilson 
  */
 @RestController // shorthand for @Controller, @ResponseBody
 @RequestMapping(value = "/api/sessions/")
-public class SessionServiceController
-{
-
-    private final SessionRepository sessionRepository;
+public class SessionServiceController {
 
     @Autowired
-    public SessionServiceController(SessionRepository sessionRepository)
-    {
-        this.sessionRepository = sessionRepository;
-    }
-    
-    @RequestMapping(method = RequestMethod.POST)
-    public Session addSession(@RequestBody String data) 
-    {
-        return sessionRepository.save(new Session(data)); 
+    private SessionService sessionService;
+
+    @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
+    @JsonView(Session.Views.IdOnly.class)
+    public Session addSession(@PathVariable String source, 
+        @PathVariable String type, 
+        @RequestBody String data) { 
+        return sessionService.addSession(source, type, data);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
-    public Iterable<Session> getSessions()
-    {
-        return sessionRepository.findAll();
+    @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
+    @JsonView(Session.Views.Full.class)
+    public Iterable<Session> getSessions(@PathVariable String source, 
+        @PathVariable String type) {
+        return sessionService.getSessions(source, type);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public Session getSession(@PathVariable String id) 
-    {
-        Session session = sessionRepository.findOne(id);
-        if (session != null) {
-            return session;
-        }
-        throw new SessionNotFoundException(id);
+    @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}/query")
+    @JsonView(Session.Views.Full.class)
+    public Iterable<Session> getSessionsByQuery(@PathVariable String source, 
+        @PathVariable String type, 
+        @RequestParam(name="field") String field,
+        @RequestParam(name="value") String value) {
+        return sessionService.getSessionsByQuery(source, type, field, value);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public Session updateSession(@PathVariable String id, @RequestBody String data)
-    {
-        Session savedSession = sessionRepository.findOne(id);
-        if (savedSession != null) {
-            savedSession.setData(data);
-            return sessionRepository.save(savedSession);
-        }
-        throw new SessionNotFoundException(id);
+    @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.GET)
+    @JsonView(Session.Views.Full.class)
+    public Session getSession(@PathVariable String source, 
+        @PathVariable String type,
+        @PathVariable String id) {
+        return sessionService.getSession(source, type, id);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public void deleteSession(@PathVariable String id)
-    {
-        Session session = sessionRepository.findOne(id);
-        if (session != null) {
-            sessionRepository.delete(session);
-        } else {
-            throw new SessionNotFoundException(id);
-        }
+    @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.PUT)
+    public void updateSession(@PathVariable String source, 
+        @PathVariable String type,
+        @PathVariable String id, 
+        @RequestBody String data) {
+        sessionService.updateSession(source, type, id, data);
+    }
+
+    @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.DELETE)
+    public void deleteSession(@PathVariable String source, 
+        @PathVariable String type,
+        @PathVariable String id) {
+        sessionService.deleteSession(source, type, id);
     } 
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    class SessionNotFoundException extends RuntimeException {
-
-        public SessionNotFoundException(String id) {
-            super("could not find session '" + id + "'.");
-        }
+    @ExceptionHandler
+    public void handleSessionInvalid(SessionInvalidException e, HttpServletResponse response) 
+        throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
+
+    @ExceptionHandler
+    public void handleSessionQueryInvalid(SessionQueryInvalidException e, HttpServletResponse response) 
+        throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+    
+    @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Session not found")
+    @ExceptionHandler(SessionNotFoundException.class)
+    public void handleSessionNotFound() {}
 }
