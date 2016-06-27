@@ -51,7 +51,7 @@ public class SwaggerConfig {
             .select()
             .apis(RequestHandlerSelectors.basePackage("org.cbioportal.session_service.web"))
             .build()
-            .pathMapping("/api")
+            .pathMapping("/")
             .apiInfo(apiInfo()); 
     }
 
