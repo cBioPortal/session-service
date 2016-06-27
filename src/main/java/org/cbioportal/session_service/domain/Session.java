@@ -33,6 +33,7 @@
 package org.cbioportal.session_service.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.util.DigestUtils;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -41,6 +42,7 @@ import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonView;
+
 
 import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
@@ -51,6 +53,8 @@ import com.mongodb.util.JSON; // save as JSON, not String of JSON
 public class Session {
     @Id
     private String id;
+    @NotNull
+    private String checksum;
     @NotNull
     private Object data;
     @NotNull
@@ -73,8 +77,14 @@ public class Session {
         return id;
     }
 
+    public String getChecksum() {
+        return checksum;
+    }
+
     public void setData(String data) {
         this.data = JSON.parse(data);
+        // JSON.serialize it so that formatting is the same if we test later
+        this.checksum = DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
     }
 
     @JsonView(Session.Views.Full.class)
