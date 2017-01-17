@@ -27,60 +27,39 @@ $ git clone https://github.com/cBioPortal/session-service.git
 
 $ cd session-service
 
-session-service$ mvn package -Dpackaging.type=jar && java -jar target/session_service-0.1.0.jar
+session-service$ mvn package -Dpackaging.type=jar && java -Dspring.data.mongodb.uri=mongodb://localhost:27017/session-service -jar target/session_service-0.1.0.jar 
 ```
-
-To run with a different profile (e.g. application-PROFILE.properties):
-
-```
-session-service$ mvn package -Dpackaging.type=jar && java -jar target/session_service-0.1.0.jar --spring.profiles.active=PROFILE
-```
-
-Generate war file:
+To generate war file with a configuration file:
 
 ```
 $ cd session-service
 
+session-service$ mkdir src/main/resources/
+
+session-service$ cp /path/to/myapp.config src/main/resources/
+
 session-service$ mvn package
 ```
-To generate war file with a different profile (e.g. application-PROFILE.properties):
-```
-mvn package -Dspring.profiles.active=PROFILE
-```
 
-In production run with an external configuration file using a JVM property so that database properties are not saved in Github:
+An example properties file:
 
 ```
--Dspring.config.location=/srv/myapp/config.properties
+spring.data.mongodb.database=session_service
+spring.data.mongodb.host=localhost
+spring.data.mongodb.port=27017
 ```
 
-To have a context root that is not "/", change the application-PROFILE.properties file:
+To have a context root that is not "/", add to the properties file:
 ```
 server.contextPath=/session_service
 server.port=8080
 ```
 
-Assumptions: 
-
-* When running 'local' profile (using application-local.properties) assumes MongoDB 
-is running on localhost, default port 27017, that the database name is 'session_service' 
-and that no username and password are required.
-If any of these things are not true (hopefully the database is password protected)
-run with an external file using a command line switch:
-```
---spring.config.location=/srv/myapp/config.properties
-```
-Or setting a JVM property:
-```
--Dspring.config.location=/srv/myapp/config.properties
-```
-
 * Assumes you want to run the server on port 8080.  This can be overridden by
 setting the process's SERVER_PORT environment variable.
 ```
-session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar && java -jar target/session_service-0.1.0.jar
+session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar && java -Dspring.data.mongodb.uri=mongodb://localhost:27017/session-service -jar target/session_service-0.1.0.jar
 ```
-
 
 ## API
 
