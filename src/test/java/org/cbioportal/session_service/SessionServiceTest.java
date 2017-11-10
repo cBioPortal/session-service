@@ -152,7 +152,7 @@ public class SessionServiceTest {
     @Test
     public void addSessionInvalidType() throws Exception {
         ResponseEntity<String> response = addData("msk_portal", "invalid_type", "\"portal-session\":\"blah blah blah\""); 
-        assertThat(response.getBody(), containsString("valid types are: 'main_session' and 'virtual_cohort'"));
+        assertThat(response.getBody(), containsString("valid types are: 'main_session' and 'virtual_study'"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -374,7 +374,7 @@ public class SessionServiceTest {
     public void deleteSessionValidIdWrongSource() throws Exception {
         // first add data
         String data = "\"portal-session\":{\"arg1\":\"first argument\"}";
-        ResponseEntity<String> response = addData("msk_portal", "virtual_cohort", data);
+        ResponseEntity<String> response = addData("msk_portal", "virtual_study", data);
 
         // get id
         List<String> ids = parseIds(response.getBody());
@@ -382,8 +382,8 @@ public class SessionServiceTest {
         String id = ids.get(0);
 
         // get record from database
-        response = template.getForEntity(base.toString() + "msk_portal/virtual_cohort/" + id, String.class);
-        assertThat(expectedResponse(response.getBody(), "msk_portal", "virtual_cohort", data), equalTo(true)); 
+        response = template.getForEntity(base.toString() + "msk_portal/virtual_study/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "virtual_study", data), equalTo(true)); 
 
         // delete with different source
         response = template.exchange(base.toString() + "msk_portal/main_session/" + id, HttpMethod.DELETE, null, String.class);
@@ -391,7 +391,7 @@ public class SessionServiceTest {
         assertThat(response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
 
         // delete with correct source
-        response = template.exchange(base.toString() + "msk_portal/virtual_cohort/" + id, HttpMethod.DELETE, null, String.class);
+        response = template.exchange(base.toString() + "msk_portal/virtual_study/" + id, HttpMethod.DELETE, null, String.class);
         assertThat(response.getBody(), equalTo(null)); 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }

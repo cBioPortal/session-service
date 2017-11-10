@@ -61,7 +61,7 @@ public class Session {
     @Size(min=3, message="source has a minimum length of 3")
     private String source;
     @NotNull
-    @Pattern(regexp="main_session|virtual_cohort", message="valid types are: 'main_session' and 'virtual_cohort'")
+    @Pattern(regexp="main_session|virtual_study", message="valid types are: 'main_session' and 'virtual_study'")
     private String type;
 
     private Session() {}
