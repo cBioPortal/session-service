@@ -73,7 +73,7 @@ Swagger documentation will be found here: http://[url]:[port]/swagger-ui.html e.
 Creates a session.  Returns status 200 and the session id in response body
 on success.  The session is saved in a collection named {type}. Both
 source and type are saved in the session document. Valid types are:
-main_session and virtual_cohort.  If a session with the same source, type,
+main_session and virtual_study.  If a session with the same source, type,
 and data already exists in the database returns the session id of that session
 instead of creating a duplicate.  
 
@@ -98,7 +98,7 @@ with something like the following in the body:
   "status": 400,
   "error": "Bad Request",
   "exception": "org.cbioportal.session_service.domain.exception.SessionInvalidException",
-  "message": "valid types are: 'main_session' and 'virtual_cohort';",
+  "message": "valid types are: 'main_session' and 'virtual_study';",
   "path": "/api/sessions/msk_portal/invalid_type/"
 }
 ```
