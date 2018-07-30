@@ -52,13 +52,24 @@ spring.data.mongodb.port=27017
 ```
 
 To have a context root that is not "/", add to the properties file:
+
 ```
 server.contextPath=/session_service
-server.port=8080
+server.port=8080 # change this if u want to use a different port
 ```
 
-* Assumes you want to run the server on port 8080.  This can be overridden by
-setting the process's SERVER_PORT environment variable.
+One can use session-service with or without basic authentication. It's
+disabled by default. To enable basic authentication set:
+
+```
+security.basic.enabled=true
+security.user.name=user
+security.user.password=pass
+```
+
+By default the server runs on port 8080. This can be overridden by setting the
+process's SERVER_PORT environment variable.
+
 ```
 session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar && java -Dspring.data.mongodb.uri=mongodb://localhost:27017/session-service -jar target/session_service-0.1.0.jar
 ```
@@ -66,6 +77,12 @@ session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar &
 ## API
 
 Swagger documentation will be found here: http://[url]:[port]/swagger-ui.html e.g. http://localhost:8090/swagger-ui.html
+
+If basic auth is enabled note that one should pass the username password to access these endpoints e.g. with curl:
+
+```
+curl --user user:pass
+```
 
 ### Create
 
