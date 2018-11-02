@@ -38,7 +38,11 @@ import org.cbioportal.session_service.service.SessionService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -51,7 +55,10 @@ import java.io.IOException;
  */
 @RestController // shorthand for @Controller, @ResponseBody
 @RequestMapping(value = "/api/sessions/")
-public class SessionServiceController {
+@EnableWebSecurity
+public class SessionServiceController  extends WebSecurityConfigurerAdapter {
+    @Value("${security.basic.enabled:false}")
+    private boolean securityEnabled;
 
     @Autowired
     private SessionService sessionService;
@@ -118,4 +125,22 @@ public class SessionServiceController {
     @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Session not found")
     @ExceptionHandler(SessionNotFoundException.class)
     public void handleSessionNotFound() {}
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        if (securityEnabled) {
+            http
+                .csrf().disable()
+                .authorizeRequests()
+                .anyRequest().authenticated()
+                .and().httpBasic();
+        } else {
+            http
+                .csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/**")
+                .permitAll();
+
+        }
+    }
 }
