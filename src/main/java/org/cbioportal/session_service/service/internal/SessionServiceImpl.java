@@ -66,9 +66,9 @@ public class SessionServiceImpl implements SessionService {
             session = new Session(source, type, data);
             sessionRepository.saveSession(session);
         } catch (DuplicateKeyException e) {
-            session = sessionRepository.findOneBySourceAndTypeAndData(source,
+            session = sessionRepository.findOneBySourceAndTypeAndChecksum(source,
                 type,
-                session.getData());
+                session.getChecksum());
         } catch (ConstraintViolationException e) {
             throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
         } catch (JSONParseException e) {
