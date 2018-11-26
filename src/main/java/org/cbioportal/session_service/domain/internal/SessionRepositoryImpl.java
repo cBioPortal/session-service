@@ -75,6 +75,11 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
         return this.mongoTemplate.findOne(query, Session.class, type);
     }
 
+    public Session findOneBySourceAndTypeAndChecksum(String source, String type, String checksum) {
+        Query query = new Query(Criteria.where("source").is(source).and("type").is(type).and("checksum").is(checksum));
+        return this.mongoTemplate.findOne(query, Session.class, type);
+    }
+
     public Session findOneBySourceAndTypeAndId(String source, String type, String id) {
         return this.mongoTemplate.findOne(
             new Query(Criteria.where("source").is(source).and("type").is(type).and("id").is(id)), 

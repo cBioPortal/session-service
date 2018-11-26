@@ -45,6 +45,8 @@ public interface SessionRepositoryCustom {
 
     Session findOneBySourceAndTypeAndData(String source, String type, Object data);
 
+    Session findOneBySourceAndTypeAndChecksum(String source, String type, String checksum);
+
     Session findOneBySourceAndTypeAndId(String source, String type, String id);
 
     List<Session> findBySourceAndType(String source, String type);
