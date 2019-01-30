@@ -37,6 +37,7 @@ import org.cbioportal.session_service.service.exception.*;
 import org.cbioportal.session_service.service.SessionService;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -46,9 +47,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import io.swagger.annotations.ApiParam;
+
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Manda Wilson 
@@ -66,7 +72,7 @@ public class SessionServiceController  extends WebSecurityConfigurerAdapter {
     @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
     @JsonView(Session.Views.IdOnly.class)
     public Session addSession(@PathVariable String source, 
-        @PathVariable String type, 
+        @PathVariable SessionType type, 
         @RequestBody String data) { 
         return sessionService.addSession(source, type, data);
     }
@@ -74,30 +80,40 @@ public class SessionServiceController  extends WebSecurityConfigurerAdapter {
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
     @JsonView(Session.Views.Full.class)
     public Iterable<Session> getSessions(@PathVariable String source, 
-        @PathVariable String type) {
+        @PathVariable SessionType type) {
         return sessionService.getSessions(source, type);
     }
-
+    
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}/query")
     @JsonView(Session.Views.Full.class)
     public Iterable<Session> getSessionsByQuery(@PathVariable String source, 
-        @PathVariable String type, 
+        @PathVariable SessionType type, 
         @RequestParam(name="field") String field,
         @RequestParam(name="value") String value) {
-        return sessionService.getSessionsByQuery(source, type, field, value);
+        String query = "{\""+field+"\":\""+value+"\"}";
+        return sessionService.getSessionsByQuery(source, type, query);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/{source}/{type}/query/fetch")
+    @JsonView(Session.Views.Full.class)
+    public Iterable<Session> fetchSessionsByQuery(@PathVariable String source,
+            @PathVariable SessionType type,
+            @ApiParam(required = true, value = "selection filter similar to mongo filter")
+            @RequestBody String query) {
+        return sessionService.getSessionsByQuery(source, type, query);
     }
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.GET)
     @JsonView(Session.Views.Full.class)
     public Session getSession(@PathVariable String source, 
-        @PathVariable String type,
+        @PathVariable SessionType type,
         @PathVariable String id) {
         return sessionService.getSession(source, type, id);
     }
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.PUT)
     public void updateSession(@PathVariable String source, 
-        @PathVariable String type,
+        @PathVariable SessionType type,
         @PathVariable String id, 
         @RequestBody String data) {
         sessionService.updateSession(source, type, id, data);
@@ -105,7 +121,7 @@ public class SessionServiceController  extends WebSecurityConfigurerAdapter {
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.DELETE)
     public void deleteSession(@PathVariable String source, 
-        @PathVariable String type,
+        @PathVariable SessionType type,
         @PathVariable String id) {
         sessionService.deleteSession(source, type, id);
     } 
@@ -125,6 +141,17 @@ public class SessionServiceController  extends WebSecurityConfigurerAdapter {
     @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Session not found")
     @ExceptionHandler(SessionNotFoundException.class)
     public void handleSessionNotFound() {}
+    
+    @ExceptionHandler
+    public void handleSessionTypeInvalid(MethodArgumentTypeMismatchException e, HttpServletResponse response)
+            throws IOException {
+        if (e.getRequiredType() == SessionType.class) {
+            List<String> validTypes = Stream.of(SessionType.values()).map(Enum::name).collect(Collectors.toList());
+            response.sendError(HttpStatus.BAD_REQUEST.value(), "valid types are: " + String.join(", ", validTypes));
+        } else {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        }
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

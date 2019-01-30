@@ -36,6 +36,7 @@ import org.cbioportal.session_service.service.SessionService;
 import org.cbioportal.session_service.service.exception.*;
 import org.cbioportal.session_service.domain.Session;
 import org.cbioportal.session_service.domain.SessionRepository;
+import org.cbioportal.session_service.domain.SessionType;
 
 import com.mongodb.util.JSONParseException;
 import java.lang.IllegalArgumentException;
@@ -60,7 +61,7 @@ public class SessionServiceImpl implements SessionService {
     private SessionRepository sessionRepository;
 
     @Override
-    public Session addSession(String source, String type, String data) throws SessionInvalidException {
+    public Session addSession(String source, SessionType type, String data) throws SessionInvalidException {
         Session session = null; 
         try {
             session = new Session(source, type, data);
@@ -78,15 +79,15 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public List<Session> getSessions(String source, String type) {
+    public List<Session> getSessions(String source, SessionType type) {
         return sessionRepository.findBySourceAndType(source, type);
     }
 
     @Override
-    public List<Session> getSessionsByQuery(String source, String type, String field, String value) 
+    public List<Session> getSessionsByQuery(String source, SessionType type, String query) 
         throws SessionQueryInvalidException {
         try {
-            return sessionRepository.findBySourceAndTypeAndQuery(source, type, field, value);
+            return sessionRepository.findBySourceAndTypeAndQuery(source, type, query);
         } catch (IllegalArgumentException e) {
             throw new SessionQueryInvalidException(e.getMessage());
         } catch (UncategorizedMongoDbException e) {
@@ -95,7 +96,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Session getSession(String source, String type, String id) throws SessionNotFoundException {
+    public Session getSession(String source, SessionType type, String id) throws SessionNotFoundException {
         Session session = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (session != null) {
             return session;
@@ -104,7 +105,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public void updateSession(String source, String type, String id, String data) throws SessionInvalidException, 
+    public void updateSession(String source, SessionType type, String id, String data) throws SessionInvalidException, 
         SessionNotFoundException {
         Session savedSession = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (savedSession != null) {
@@ -122,7 +123,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public void deleteSession(String source, String type, String id) throws SessionNotFoundException {
+    public void deleteSession(String source, SessionType type, String id) throws SessionNotFoundException {
         int numberDeleted = sessionRepository.deleteBySourceAndTypeAndId(source, type, id);
         if (numberDeleted != 1) { // using unique id so never more than 1 
             throw new SessionNotFoundException(id);
