@@ -33,7 +33,7 @@
 package org.cbioportal.session_service.domain.internal;
 
 import org.cbioportal.session_service.domain.Session;
-
+import org.cbioportal.session_service.domain.SessionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
@@ -41,6 +41,7 @@ import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 
 import java.util.List;
@@ -58,49 +59,49 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
     
     @Override
     public void saveSession(Session session) {
-        if (!this.mongoTemplate.collectionExists(session.getType())) {
-            this.mongoTemplate.createCollection(session.getType());
+        if (!this.mongoTemplate.collectionExists(session.getType().toString())) {
+            this.mongoTemplate.createCollection(session.getType().toString());
             DBObject indexKeys = new BasicDBObject();
             indexKeys.put("source", 1);
             indexKeys.put("type", 1);
             indexKeys.put("checksum", 1);
-            this.mongoTemplate.indexOps(session.getType()).ensureIndex(
+            this.mongoTemplate.indexOps(session.getType().toString()).ensureIndex(
                 new CompoundIndexDefinition(indexKeys).unique());
         } 
-        this.mongoTemplate.save(session, session.getType());
+        this.mongoTemplate.save(session, session.getType().toString());
     }
 
-    public Session findOneBySourceAndTypeAndData(String source, String type, Object data) {
+    public Session findOneBySourceAndTypeAndData(String source, SessionType type, Object data) {
         Query query = new Query(Criteria.where("source").is(source).and("type").is(type).and("data").is(data));
-        return this.mongoTemplate.findOne(query, Session.class, type);
+        return this.mongoTemplate.findOne(query, Session.class, type.toString());
     }
 
-    public Session findOneBySourceAndTypeAndChecksum(String source, String type, String checksum) {
+    public Session findOneBySourceAndTypeAndChecksum(String source, SessionType type, String checksum) {
         Query query = new Query(Criteria.where("source").is(source).and("type").is(type).and("checksum").is(checksum));
-        return this.mongoTemplate.findOne(query, Session.class, type);
+        return this.mongoTemplate.findOne(query, Session.class, type.toString());
     }
 
-    public Session findOneBySourceAndTypeAndId(String source, String type, String id) {
+    public Session findOneBySourceAndTypeAndId(String source, SessionType type, String id) {
         return this.mongoTemplate.findOne(
             new Query(Criteria.where("source").is(source).and("type").is(type).and("id").is(id)), 
-            Session.class, type);
+            Session.class, type.toString());
     }
 
-    public List<Session> findBySourceAndType(String source, String type) {
+    public List<Session> findBySourceAndType(String source, SessionType type) {
         return this.mongoTemplate.find(
             new Query(Criteria.where("source").is(source).and("type").is(type)), 
-            Session.class, type);
+            Session.class, type.toString());
     }
 
-    public int deleteBySourceAndTypeAndId(String source, String type, String id) {
+    public int deleteBySourceAndTypeAndId(String source, SessionType type, String id) {
         return this.mongoTemplate.remove(
             new Query(Criteria.where("source").is(source).and("type").is(type).and("id").is(id)),
-            Session.class, type).getN();
+            Session.class, type.toString()).getN();
     }
 
-    public List<Session> findBySourceAndTypeAndQuery(String source, String type, String field, String value) {
-        return this.mongoTemplate.find(
-            new Query(Criteria.where("source").is(source).and("type").is(type).and(field).is(value)),
-            Session.class, type);
+    public List<Session> findBySourceAndTypeAndQuery(String source, SessionType type, String query) {
+        BasicQuery basicQuery = new BasicQuery(query);
+        basicQuery.addCriteria(Criteria.where("source").is(source));
+        return this.mongoTemplate.find(basicQuery, Session.class, type.toString());
     }
 }

@@ -152,7 +152,7 @@ public class SessionServiceTest {
     @Test
     public void addSessionInvalidType() throws Exception {
         ResponseEntity<String> response = addData("msk_portal", "invalid_type", "\"portal-session\":\"blah blah blah\""); 
-        assertThat(response.getBody(), containsString("valid types are: 'main_session' and 'virtual_study'"));
+        assertThat(response.getBody(), containsString("org.springframework.web.method.annotation.MethodArgumentTypeMismatchException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -265,6 +265,48 @@ public class SessionServiceTest {
 
         // now query
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=$data.portal-session.title&value=my portal session", String.class);
+        assertThat(response.getBody(), containsString("Can't canonicalize query"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void fetchSessionWithQuery() throws Exception {
+        // first add data
+        String data = "\"portal-session\":{\"title\":\"my portal session\"}";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
+        
+        HttpEntity<String> entity = prepareData("\"data.portal-session.title\":\"my portal session\"");
+
+        // now query
+        response = template.exchange(base.toString() + "msk_portal/main_session/query/fetch", HttpMethod.POST, entity, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data, true), equalTo(true)); 
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+    }
+
+    @Test
+    public void fetchSessionWithQueryNullCharacterInField() throws Exception {
+        // first add data
+        String data = "\"portal-session\":{\"title\":\"my portal session\"}";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
+        
+        HttpEntity<String> entity = prepareData("\"data.p\\\0ortal-session.title\":\"my portal session\"");
+
+        // now query
+        response = template.exchange(base.toString() + "msk_portal/main_session/query/fetch", HttpMethod.POST, entity, String.class);
+        assertThat(response.getBody(), containsString("Document field names can't have a NULL character"));
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void fetchSessionWithQueryFieldStartsWithDollarSign() throws Exception {
+        // first add data
+        String data = "\"portal-session\":{\"title\":\"my portal session\"}";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", data);
+
+        HttpEntity<String> entity = prepareData("\"$data.portal-session.title\":\"my portal session\"");
+
+        // now query
+        response = template.exchange(base.toString() + "msk_portal/main_session/query/fetch", HttpMethod.POST, entity, String.class);
         assertThat(response.getBody(), containsString("Can't canonicalize query"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }

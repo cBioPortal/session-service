@@ -86,11 +86,19 @@ curl --user user:pass
 
 ### Create
 
+### Valid Type
+
+| Type  | Description  |
+|---|---|
+| main_session | represent result's page query |
+| virtual_study | represent a subset for samples saved from study summary page |
+| group | similar to virtual study except its used in comparison page |
+| comparison_session | represent comparison page query |
+
 #### POST http://localhost:8080/api/sessions/{source}/{type}/
 Creates a session.  Returns status 200 and the session id in response body
 on success.  The session is saved in a collection named {type}. Both
-source and type are saved in the session document. Valid types are:
-main_session and virtual_study.  If a session with the same source, type,
+source and type are saved in the session document. If a session with the same source, type,
 and data already exists in the database returns the session id of that session
 instead of creating a duplicate.  
 
@@ -114,8 +122,8 @@ with something like the following in the body:
   "timestamp": 1461093154793,
   "status": 400,
   "error": "Bad Request",
-  "exception": "org.cbioportal.session_service.domain.exception.SessionInvalidException",
-  "message": "valid types are: 'main_session' and 'virtual_study';",
+  "exception": "org.springframework.web.method.annotation.MethodArgumentTypeMismatchException",
+  "message": "valid types are: main_session, virtual_study, group, comparison_session",
   "path": "/api/sessions/msk_portal/invalid_type/"
 }
 ```

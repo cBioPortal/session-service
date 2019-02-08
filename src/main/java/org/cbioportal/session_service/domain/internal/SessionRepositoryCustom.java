@@ -33,6 +33,7 @@
 package org.cbioportal.session_service.domain.internal;
 
 import org.cbioportal.session_service.domain.Session;
+import org.cbioportal.session_service.domain.SessionType;
 
 import java.util.List;
 
@@ -43,16 +44,16 @@ public interface SessionRepositoryCustom {
 
     void saveSession(Session session);
 
-    Session findOneBySourceAndTypeAndData(String source, String type, Object data);
+    Session findOneBySourceAndTypeAndData(String source, SessionType type, Object data);
 
-    Session findOneBySourceAndTypeAndChecksum(String source, String type, String checksum);
+    Session findOneBySourceAndTypeAndChecksum(String source, SessionType type, String checksum);
 
-    Session findOneBySourceAndTypeAndId(String source, String type, String id);
+    Session findOneBySourceAndTypeAndId(String source, SessionType type, String id);
 
-    List<Session> findBySourceAndType(String source, String type);
+    List<Session> findBySourceAndType(String source, SessionType type);
 
-    int deleteBySourceAndTypeAndId(String source, String type, String id);
+    int deleteBySourceAndTypeAndId(String source, SessionType type, String id);
 
-    List<Session> findBySourceAndTypeAndQuery(String source, String type, String field, String value);
+    List<Session> findBySourceAndTypeAndQuery(String source, SessionType type, String query);
 
 }
