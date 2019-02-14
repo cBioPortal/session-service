@@ -17,7 +17,7 @@
     },
     "MAVEN_CUSTOM_OPTS": {
         "description":"set heroku profile for mvn",
-        "value":"-DskipTests -Dpackaging.type=jar"
+        "value":"-DskipTests -Dpackaging.type=jar -Ddockerfile.skip"
     }
   },
   "buildpacks": [
