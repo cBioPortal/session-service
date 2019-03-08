@@ -159,6 +159,7 @@ public class SessionServiceController  extends WebSecurityConfigurerAdapter {
             http
                 .csrf().disable()
                 .authorizeRequests()
+                .antMatchers("/info").permitAll()
                 .anyRequest().authenticated()
                 .and().httpBasic();
         } else {
