@@ -130,6 +130,7 @@ curl --user user:pass
 | virtual_study | represent a subset for samples saved from study summary page |
 | group | similar to virtual study except its used in comparison page |
 | comparison_session | represent comparison page query |
+| settings | represent cbio page settings. page type is identified by a field `page` in it |
 
 #### POST http://localhost:8080/api/sessions/{source}/{type}/
 Creates a session.  Returns status 200 and the session id in response body

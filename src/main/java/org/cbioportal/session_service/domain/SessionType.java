@@ -4,5 +4,6 @@ public enum SessionType {
 	main_session,
 	virtual_study,
 	group,
-	comparison_session;
+	comparison_session,
+	settings;
 }
