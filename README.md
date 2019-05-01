@@ -6,6 +6,26 @@ RESTful API to cBioPortal/cbioportal sessions in MongoDB.
 
 Session information is stored in JSON, so this API generalizes to any JSON objects.
 
+
+## Run with Docker
+```
+docker-compose up
+```
+If you want to rebuild the session service image after having made changes in
+development:
+```
+docker-compose up --build
+```
+Check http://localhost:8080/info to confirm session service is running. It
+should show a version number.
+
+Test whether a session can be created like this:
+
+```
+curl -H "Content-Type: application/json" --user user:pass -X POST http://localhost:8080/api/sessions/test_portal/main_session --data '{"title": "my main portal session", "description": "this is an example"}'
+```
+
+## Run without docker
 ### Requirements
 
 JDK 1.7 or later: http://www.oracle.com/technetwork/java/javase/downloads/index.html
