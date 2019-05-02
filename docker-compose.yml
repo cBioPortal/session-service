@@ -15,3 +15,6 @@ services:
   db:
     image: mongo:3.6.6
     restart: always
+    # this makes mongo use smaller default size limits:
+    # https://docs.mongodb.com/manual/reference/program/mongod/#cmdoption-mongod-smallfiles
+    command: --smallfiles

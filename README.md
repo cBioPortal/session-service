@@ -11,6 +11,14 @@ Session information is stored in JSON, so this API generalizes to any JSON objec
 ```
 docker-compose up
 ```
+You can also run it in detached mode with:
+```
+docker-compose up -d
+```
+In that case, to stop it one runs:
+```
+docker-compose down
+```
 If you want to rebuild the session service image after having made changes in
 development:
 ```
