@@ -33,6 +33,14 @@ Test whether a session can be created like this:
 curl -H "Content-Type: application/json" --user user:pass -X POST http://localhost:8080/api/sessions/test_portal/main_session --data '{"title": "my main portal session", "description": "this is an example"}'
 ```
 
+The mongo database port is not exposed by default. One can connect to the
+mongo database like this:
+```
+docker exec -it session-service_db_1 mongo mongodb://localhost:27017
+```
+
+
+
 ## Run without docker
 ### Requirements
 

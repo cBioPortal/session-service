@@ -18,3 +18,6 @@ services:
     # this makes mongo use smaller default size limits:
     # https://docs.mongodb.com/manual/reference/program/mongod/#cmdoption-mongod-smallfiles
     command: --smallfiles
+    # uncomment this to expose the db port on localhost
+    # ports:
+    #   - "27017:27017"
