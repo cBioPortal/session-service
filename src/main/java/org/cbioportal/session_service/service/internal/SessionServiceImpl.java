@@ -64,7 +64,11 @@ public class SessionServiceImpl implements SessionService {
     public Session addSession(String source, SessionType type, String data) throws SessionInvalidException {
         Session session = null; 
         try {
-            session = new Session(source, type, data);
+            session = new Session();
+            session.setSource(source);
+            session.setType(type);
+            session.setData(data);
+            
             sessionRepository.saveSession(session);
         } catch (DuplicateKeyException e) {
             session = sessionRepository.findOneBySourceAndTypeAndChecksum(source,
