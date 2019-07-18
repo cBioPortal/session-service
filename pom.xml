@@ -20,15 +20,16 @@
     <profiles>
         <profile>
             <id>war</id>
-            <activation>
-            <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <packaging.type>war</packaging.type>
             </properties>
         </profile>
         <profile>
             <id>jar</id>
+            <!-- Set activeByDefault to jar profile for jitpack to work -->
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <packaging.type>jar</packaging.type>
             </properties>
@@ -100,6 +101,24 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>model</classifier>
+                            <includes>
+                                <include>org/cbioportal/session_service/domain/**</include>
+                            </includes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

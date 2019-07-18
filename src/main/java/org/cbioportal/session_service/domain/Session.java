@@ -60,14 +60,6 @@ public class Session {
     @NotNull
     private SessionType type;
     
-    
-    private Session() {}
-
-    public Session(String source, SessionType type, String data) {
-        this.source = source;
-        this.type = type;
-        this.setData(data);
-    }
 
     @JsonView(Session.Views.IdOnly.class)
     public String getId() {
@@ -78,8 +70,12 @@ public class Session {
         return checksum;
     }
 
-    public void setData(String data) {
-        this.data = JSON.parse(data);
+    public void setData(Object data) {
+        if(data instanceof String) {
+            this.data = JSON.parse((String)data);
+        } else {
+            this.data = data; 
+        }
         // JSON.serialize it so that formatting is the same if we test later
         this.checksum = DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
     }
@@ -105,11 +101,6 @@ public class Session {
     @JsonView(Session.Views.Full.class)
     public String getSource() {
         return source;
-    }
-
-    @Override
-    public String toString() {
-        return data.toString();
     }
 
     public static final class Views {
