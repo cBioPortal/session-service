@@ -10,5 +10,7 @@ WORKDIR /session-service
 RUN mvn package -DskipTests -Dpackaging.type=jar
 
 FROM openjdk:8-jre
-COPY --from=build /session-service/target/*.jar /app.war
+# copy over target/session_service-x.y.z.jar ignore *-model.jar, that jar is
+# used by cbioportal/cbioportal to import the models
+COPY --from=build /session-service/target/*[0-9].jar /app.war
 CMD /usr/bin/java ${JAVA_OPTS} -jar /app.war
