@@ -34,6 +34,8 @@ package org.cbioportal.session_service.service.internal;
 
 import org.cbioportal.session_service.service.SessionService;
 import org.cbioportal.session_service.service.exception.*;
+import org.bson.BSONException;
+import org.bson.json.JsonParseException;
 import org.cbioportal.session_service.domain.Session;
 import org.cbioportal.session_service.domain.SessionRepository;
 import org.cbioportal.session_service.domain.SessionType;
@@ -92,7 +94,7 @@ public class SessionServiceImpl implements SessionService {
         throws SessionQueryInvalidException {
         try {
             return sessionRepository.findBySourceAndTypeAndQuery(source, type, query);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | JsonParseException | BSONException e) {
             throw new SessionQueryInvalidException(e.getMessage());
         } catch (UncategorizedMongoDbException e) {
             throw new SessionQueryInvalidException(e.getMessage());
@@ -128,7 +130,7 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void deleteSession(String source, SessionType type, String id) throws SessionNotFoundException {
-        int numberDeleted = sessionRepository.deleteBySourceAndTypeAndId(source, type, id);
+        long numberDeleted = sessionRepository.deleteBySourceAndTypeAndId(source, type, id);
         if (numberDeleted != 1) { // using unique id so never more than 1 
             throw new SessionNotFoundException(id);
         }

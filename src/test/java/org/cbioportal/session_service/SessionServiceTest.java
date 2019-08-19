@@ -39,15 +39,11 @@ import java.net.URL;
 
 import org.junit.*;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.regex.Pattern;
 import java.util.List;
@@ -58,20 +54,15 @@ import java.util.regex.Matcher;
  * @author Manda Wilson 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = SessionService.class)
-@WebAppConfiguration
-// pick random port for testing
-@IntegrationTest({"server.port=0"})
-// use application-test.properties config file
-@ActiveProfiles("test")
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SessionService.class, value= {"server.error.include-exception=true"})
 public class SessionServiceTest {
 
     // get randomly assigned port
-    @Value("${local.server.port}")
+    @LocalServerPort
     private int port;
 
     private URL base;
-    private RestTemplate template;
+    private TestRestTemplate template;
 
     @Before
     public void setUp() throws Exception {
@@ -145,6 +136,8 @@ public class SessionServiceTest {
     @Test
     public void addSessionInvalidData() throws Exception {
         ResponseEntity<String> response = addData("msk_portal", "main_session", "\"portal-session\":blah blah blah"); 
+        System.out.println("&&&&&&&&&&");
+        System.out.println(response);
         assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionInvalidException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
@@ -253,7 +246,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=data.p\0ortal-session.title&value=my portal session", String.class);
-        assertThat(response.getBody(), containsString("Document field names can't have a NULL character"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionQueryInvalidException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -265,7 +258,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=$data.portal-session.title&value=my portal session", String.class);
-        assertThat(response.getBody(), containsString("Can't canonicalize query"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionQueryInvalidException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -293,7 +286,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.exchange(base.toString() + "msk_portal/main_session/query/fetch", HttpMethod.POST, entity, String.class);
-        assertThat(response.getBody(), containsString("Document field names can't have a NULL character"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionQueryInvalidException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -307,7 +300,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.exchange(base.toString() + "msk_portal/main_session/query/fetch", HttpMethod.POST, entity, String.class);
-        assertThat(response.getBody(), containsString("Can't canonicalize query"));
+        assertThat(response.getBody(), containsString("org.cbioportal.session_service.service.exception.SessionQueryInvalidException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 

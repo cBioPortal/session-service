@@ -32,13 +32,12 @@
 
 package org.cbioportal.session_service.domain.internal;
 
+import org.bson.Document;
 import org.cbioportal.session_service.domain.Session;
 import org.cbioportal.session_service.domain.SessionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import com.mongodb.DBObject;
-import com.mongodb.BasicDBObject;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.BasicQuery;
@@ -61,10 +60,10 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
     public void saveSession(Session session) {
         if (!this.mongoTemplate.collectionExists(session.getType().toString())) {
             this.mongoTemplate.createCollection(session.getType().toString());
-            DBObject indexKeys = new BasicDBObject();
-            indexKeys.put("source", 1);
-            indexKeys.put("type", 1);
-            indexKeys.put("checksum", 1);
+            Document indexKeys = new Document();
+            indexKeys.append("source", 1);
+            indexKeys.append("type", 1);
+            indexKeys.append("checksum", 1);
             this.mongoTemplate.indexOps(session.getType().toString()).ensureIndex(
                 new CompoundIndexDefinition(indexKeys).unique());
         } 
@@ -93,10 +92,10 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
             Session.class, type.toString());
     }
 
-    public int deleteBySourceAndTypeAndId(String source, SessionType type, String id) {
+    public long deleteBySourceAndTypeAndId(String source, SessionType type, String id) {
         return this.mongoTemplate.remove(
             new Query(Criteria.where("source").is(source).and("type").is(type).and("id").is(id)),
-            Session.class, type.toString()).getN();
+            Session.class, type.toString()).getDeletedCount();
     }
 
     public List<Session> findBySourceAndTypeAndQuery(String source, SessionType type, String query) {
