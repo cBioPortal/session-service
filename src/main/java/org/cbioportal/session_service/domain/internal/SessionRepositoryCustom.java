@@ -52,7 +52,7 @@ public interface SessionRepositoryCustom {
 
     List<Session> findBySourceAndType(String source, SessionType type);
 
-    int deleteBySourceAndTypeAndId(String source, SessionType type, String id);
+    long deleteBySourceAndTypeAndId(String source, SessionType type, String id);
 
     List<Session> findBySourceAndTypeAndQuery(String source, SessionType type, String query);
 
