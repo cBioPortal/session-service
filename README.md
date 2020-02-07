@@ -127,6 +127,7 @@ curl --user user:pass
 | Type  | Description  |
 |---|---|
 | main_session | represent result's page query |
+| study_session | represent study page state |
 | virtual_study | represent a subset for samples saved from study summary page |
 | group | similar to virtual study except its used in comparison page |
 | comparison_session | represent comparison page query |
@@ -160,7 +161,7 @@ with something like the following in the body:
   "status": 400,
   "error": "Bad Request",
   "exception": "org.springframework.web.method.annotation.MethodArgumentTypeMismatchException",
-  "message": "valid types are: main_session, virtual_study, group, comparison_session",
+  "message": "valid types are: main_session, study_session, virtual_study, group, comparison_session",
   "path": "/api/sessions/msk_portal/invalid_type/"
 }
 ```
