@@ -131,6 +131,8 @@ curl --user user:pass
 | group | similar to virtual study except its used in comparison page |
 | comparison_session | represent comparison page query |
 | settings | represent cbio page settings. page type is identified by a field `page` in it |
+| custom_data | holds study-view page custom charts data |
+| genomic_chart | represents genomic chart added by user in study-view page |
 
 #### POST http://localhost:8080/api/sessions/{source}/{type}/
 Creates a session.  Returns status 200 and the session id in response body
@@ -160,7 +162,7 @@ with something like the following in the body:
   "status": 400,
   "error": "Bad Request",
   "exception": "org.springframework.web.method.annotation.MethodArgumentTypeMismatchException",
-  "message": "valid types are: main_session, virtual_study, group, comparison_session",
+  "message": "valid types are: main_session, virtual_study, group, comparison_session, custom_data, genomic_chart",
   "path": "/api/sessions/msk_portal/invalid_type/"
 }
 ```

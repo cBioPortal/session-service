@@ -5,5 +5,7 @@ public enum SessionType {
 	virtual_study,
 	group,
 	comparison_session,
-	settings;
+	settings,
+	custom_data,
+	genomic_chart;
 }
