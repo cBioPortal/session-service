@@ -33,21 +33,20 @@
 package org.cbioportal.session_service;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URL;
 
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.regex.Pattern;
 import java.util.List;
@@ -57,11 +56,10 @@ import java.util.regex.Matcher;
 /**
  * @author Manda Wilson 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = SessionService.class)
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
 // pick random port for testing
-@IntegrationTest({"server.port=0"})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = SessionService.class)
 // use application-test.properties config file
 @ActiveProfiles("test")
 public class SessionServiceTest {
@@ -71,7 +69,7 @@ public class SessionServiceTest {
     private int port;
 
     private URL base;
-    private RestTemplate template;
+    private TestRestTemplate template;
 
     @Before
     public void setUp() throws Exception {

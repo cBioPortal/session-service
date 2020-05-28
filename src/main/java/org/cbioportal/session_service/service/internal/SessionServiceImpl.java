@@ -34,11 +34,11 @@ package org.cbioportal.session_service.service.internal;
 
 import org.cbioportal.session_service.service.SessionService;
 import org.cbioportal.session_service.service.exception.*;
+import org.bson.json.JsonParseException;
 import org.cbioportal.session_service.domain.Session;
 import org.cbioportal.session_service.domain.SessionRepository;
 import org.cbioportal.session_service.domain.SessionType;
 
-import com.mongodb.util.JSONParseException;
 import java.lang.IllegalArgumentException;
 import org.springframework.data.mongodb.UncategorizedMongoDbException;
 
@@ -52,7 +52,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * @author Manda Wilson 
+ * @author Manda Wilson
  */
 @Service
 public class SessionServiceImpl implements SessionService {
@@ -62,22 +62,18 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public Session addSession(String source, SessionType type, String data) throws SessionInvalidException {
-        Session session = null; 
+        Session session = null;
         try {
             session = new Session();
             session.setSource(source);
             session.setType(type);
             session.setData(data);
-            
+
             sessionRepository.saveSession(session);
         } catch (DuplicateKeyException e) {
-            session = sessionRepository.findOneBySourceAndTypeAndChecksum(source,
-                type,
-                session.getChecksum());
+            session = sessionRepository.findOneBySourceAndTypeAndChecksum(source, type, session.getChecksum());
         } catch (ConstraintViolationException e) {
             throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
-        } catch (JSONParseException e) {
-            throw new SessionInvalidException(e.getMessage());
         }
         return session;
     }
@@ -118,7 +114,7 @@ public class SessionServiceImpl implements SessionService {
                 sessionRepository.saveSession(savedSession);
             } catch (ConstraintViolationException e) {
                 throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
-            } catch (JSONParseException e) {
+            } catch (JsonParseException e) {
                 throw new SessionInvalidException(e.getMessage());
             }   
             return;

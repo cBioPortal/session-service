@@ -40,8 +40,8 @@ import org.springframework.util.DigestUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.mongodb.BasicDBObject;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.mongodb.util.JSON; // save as JSON, not String of JSON
 
 /**
  * @author Manda Wilson 
@@ -72,12 +72,12 @@ public class Session {
 
     public void setData(Object data) {
         if(data instanceof String) {
-            this.data = JSON.parse((String)data);
+            this.data = BasicDBObject.parse((String)data);
         } else {
             this.data = data; 
         }
         // JSON.serialize it so that formatting is the same if we test later
-        this.checksum = DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
+        this.checksum = DigestUtils.md5DigestAsHex(((BasicDBObject)this.data).toString().getBytes());
     }
 
     @JsonView(Session.Views.Full.class)
