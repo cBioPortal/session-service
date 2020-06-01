@@ -251,7 +251,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=data.p\0ortal-session.title&value=my portal session", String.class);
-        assertThat(response.getBody(), containsString("Document field names can't have a NULL character"));
+        assertThat(response.getBody(), containsString("is not valid because it contains a null character"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -263,7 +263,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + "query?field=$data.portal-session.title&value=my portal session", String.class);
-        assertThat(response.getBody(), containsString("Can't canonicalize query"));
+        assertThat(response.getBody(), containsString("unknown top level operator: $"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -291,7 +291,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.exchange(base.toString() + "msk_portal/main_session/query/fetch", HttpMethod.POST, entity, String.class);
-        assertThat(response.getBody(), containsString("Document field names can't have a NULL character"));
+        assertThat(response.getBody(), containsString("Invalid escape sequence in JSON string "));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
@@ -305,7 +305,7 @@ public class SessionServiceTest {
 
         // now query
         response = template.exchange(base.toString() + "msk_portal/main_session/query/fetch", HttpMethod.POST, entity, String.class);
-        assertThat(response.getBody(), containsString("Can't canonicalize query"));
+        assertThat(response.getBody(), containsString("unknown top level operator: $"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 

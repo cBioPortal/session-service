@@ -41,6 +41,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -57,117 +59,105 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @author Manda Wilson 
+ * @author Manda Wilson
  */
 @RestController // shorthand for @Controller, @ResponseBody
 @RequestMapping(value = "/api/sessions/")
 @EnableWebSecurity
-public class SessionServiceController  extends WebSecurityConfigurerAdapter {
+public class SessionServiceController extends WebSecurityConfigurerAdapter {
     @Value("${security.basic.enabled:false}")
     private boolean securityEnabled;
 
     @Autowired
     private SessionService sessionService;
 
-    @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
+    @RequestMapping(method = RequestMethod.POST, value = "/{source}/{type}")
     @JsonView(Session.Views.IdOnly.class)
-    public Session addSession(@PathVariable String source, 
-        @PathVariable SessionType type, 
-        @RequestBody String data) { 
+    public Session addSession(@PathVariable String source, @PathVariable SessionType type, @RequestBody String data) {
         return sessionService.addSession(source, type, data);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{source}/{type}")
     @JsonView(Session.Views.Full.class)
-    public Iterable<Session> getSessions(@PathVariable String source, 
-        @PathVariable SessionType type) {
+    public Iterable<Session> getSessions(@PathVariable String source, @PathVariable SessionType type) {
         return sessionService.getSessions(source, type);
     }
-    
-    @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}/query")
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{source}/{type}/query")
     @JsonView(Session.Views.Full.class)
-    public Iterable<Session> getSessionsByQuery(@PathVariable String source, 
-        @PathVariable SessionType type, 
-        @RequestParam(name="field") String field,
-        @RequestParam(name="value") String value) {
-        String query = "{\""+field+"\":\""+value+"\"}";
+    public Iterable<Session> getSessionsByQuery(@PathVariable String source, @PathVariable SessionType type,
+            @RequestParam(name = "field") String field, @RequestParam(name = "value") String value) {
+        String query = "{\"" + field + "\":\"" + value + "\"}";
         return sessionService.getSessionsByQuery(source, type, query);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{source}/{type}/query/fetch")
     @JsonView(Session.Views.Full.class)
-    public Iterable<Session> fetchSessionsByQuery(@PathVariable String source,
-            @PathVariable SessionType type,
-            @ApiParam(required = true, value = "selection filter similar to mongo filter")
-            @RequestBody String query) {
+    public Iterable<Session> fetchSessionsByQuery(@PathVariable String source, @PathVariable SessionType type,
+            @ApiParam(required = true, value = "selection filter similar to mongo filter") @RequestBody String query) {
         return sessionService.getSessionsByQuery(source, type, query);
     }
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.GET)
     @JsonView(Session.Views.Full.class)
-    public Session getSession(@PathVariable String source, 
-        @PathVariable SessionType type,
-        @PathVariable String id) {
+    public Session getSession(@PathVariable String source, @PathVariable SessionType type, @PathVariable String id) {
         return sessionService.getSession(source, type, id);
     }
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.PUT)
-    public void updateSession(@PathVariable String source, 
-        @PathVariable SessionType type,
-        @PathVariable String id, 
-        @RequestBody String data) {
+    public void updateSession(@PathVariable String source, @PathVariable SessionType type, @PathVariable String id,
+            @RequestBody String data) {
         sessionService.updateSession(source, type, id, data);
     }
 
     @RequestMapping(value = "/{source}/{type}/{id}", method = RequestMethod.DELETE)
-    public void deleteSession(@PathVariable String source, 
-        @PathVariable SessionType type,
-        @PathVariable String id) {
+    public void deleteSession(@PathVariable String source, @PathVariable SessionType type, @PathVariable String id) {
         sessionService.deleteSession(source, type, id);
-    } 
-
-    @ExceptionHandler
-    public void handleSessionInvalid(SessionInvalidException e, HttpServletResponse response) 
-        throws IOException {
-        response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 
     @ExceptionHandler
-    public void handleSessionQueryInvalid(SessionQueryInvalidException e, HttpServletResponse response) 
-        throws IOException {
-        response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
-    }
-    
-    @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Session not found")
-    @ExceptionHandler(SessionNotFoundException.class)
-    public void handleSessionNotFound() {}
-    
-    @ExceptionHandler
-    public void handleSessionTypeInvalid(MethodArgumentTypeMismatchException e, HttpServletResponse response)
+    public ResponseEntity<Object> handleSessionInvalid(SessionInvalidException e, HttpServletResponse response)
             throws IOException {
+        return new ResponseEntity<Object>(e.getClass().getName() + ": " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleSessionQueryInvalid(SessionQueryInvalidException e,
+            HttpServletResponse response) throws IOException {
+        return new ResponseEntity<Object>(e.getClass().getName() + ": " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleSessionNotFound(SessionNotFoundException e, HttpServletResponse response) {
+        return new ResponseEntity<Object>(e.getClass().getName() + ": " + "Session not found", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleSessionTypeInvalid(MethodArgumentTypeMismatchException e,
+            HttpServletResponse response) throws IOException {
         if (e.getRequiredType() == SessionType.class) {
             List<String> validTypes = Stream.of(SessionType.values()).map(Enum::name).collect(Collectors.toList());
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "valid types are: " + String.join(", ", validTypes));
+            return new ResponseEntity<Object>(
+                    e.getClass().getName() + ": " + "valid types are: " + String.join(", ", validTypes),
+                    HttpStatus.BAD_REQUEST);
         } else {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+            return new ResponseEntity<Object>(e.getClass().getName() + ": " + e.getMessage(), HttpStatus.BAD_REQUEST);
+
         }
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpServletResponse response) {
+        return new ResponseEntity<Object>(e.getClass().getName() + ": " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         if (securityEnabled) {
-            http
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/info").permitAll()
-                .anyRequest().authenticated()
-                .and().httpBasic();
+            http.csrf().disable().authorizeRequests().antMatchers("/info").permitAll().anyRequest().authenticated()
+                    .and().httpBasic();
         } else {
-            http
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/**")
-                .permitAll();
+            http.csrf().disable().authorizeRequests().antMatchers("/**").permitAll();
 
         }
     }

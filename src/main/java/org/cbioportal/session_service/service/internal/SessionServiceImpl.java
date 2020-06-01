@@ -34,6 +34,7 @@ package org.cbioportal.session_service.service.internal;
 
 import org.cbioportal.session_service.service.SessionService;
 import org.cbioportal.session_service.service.exception.*;
+import org.bson.BSONException;
 import org.bson.json.JsonParseException;
 import org.cbioportal.session_service.domain.Session;
 import org.cbioportal.session_service.domain.SessionRepository;
@@ -41,6 +42,7 @@ import org.cbioportal.session_service.domain.SessionType;
 
 import java.lang.IllegalArgumentException;
 import org.springframework.data.mongodb.UncategorizedMongoDbException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.ConstraintViolation;
@@ -74,6 +76,10 @@ public class SessionServiceImpl implements SessionService {
             session = sessionRepository.findOneBySourceAndTypeAndChecksum(source, type, session.getChecksum());
         } catch (ConstraintViolationException e) {
             throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
+        } catch (JsonParseException e) {
+            throw new SessionInvalidException(e.getMessage());
+        } catch (HttpMessageNotReadableException e) {
+            throw new SessionInvalidException(e.getMessage());
         }
         return session;
     }
@@ -91,6 +97,10 @@ public class SessionServiceImpl implements SessionService {
         } catch (IllegalArgumentException e) {
             throw new SessionQueryInvalidException(e.getMessage());
         } catch (UncategorizedMongoDbException e) {
+            throw new SessionQueryInvalidException(e.getMessage());
+        } catch (JsonParseException e) {
+            throw new SessionQueryInvalidException(e.getMessage());
+        } catch (BSONException e) {
             throw new SessionQueryInvalidException(e.getMessage());
         }
     }
