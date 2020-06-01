@@ -139,7 +139,8 @@ public class SessionServiceImpl implements SessionService {
             throw new SessionNotFoundException(id);
         }
     }
-
+    
+    @SuppressWarnings("rawtypes")
     private String buildConstraintViolationExceptionMessage(ConstraintViolationException e) {
         StringBuffer errors = new StringBuffer();
         for (ConstraintViolation violation : e.getConstraintViolations()) {
