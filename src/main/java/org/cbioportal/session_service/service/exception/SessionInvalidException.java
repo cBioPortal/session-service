@@ -33,6 +33,11 @@
 package org.cbioportal.session_service.service.exception;
 
 public class SessionInvalidException extends RuntimeException {
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4626580368530351737L;
+
     public SessionInvalidException(String message) {
         super(message);
     }   

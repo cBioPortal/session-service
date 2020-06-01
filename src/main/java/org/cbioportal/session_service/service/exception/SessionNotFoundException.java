@@ -33,6 +33,11 @@
 package org.cbioportal.session_service.service.exception;
 
 public class SessionNotFoundException extends RuntimeException {
+    /**
+     *
+     */
+    private static final long serialVersionUID = -3069316535775668266L;
+
     public SessionNotFoundException(String id) {
         super("Could not find session '" + id + "'.");
     }
