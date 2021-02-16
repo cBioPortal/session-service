@@ -32,19 +32,17 @@
 
 package org.cbioportal.session_service.domain;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.util.DigestUtils;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.mongodb.util.JSON; // save as JSON, not String of JSON
+import com.mongodb.BasicDBObject;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import org.springframework.data.annotation.Id;
+import org.springframework.util.DigestUtils;
 
 /**
- * @author Manda Wilson 
+ * @author Manda Wilson
  */
 @JsonInclude(Include.NON_NULL)
 public class Session {
@@ -59,7 +57,7 @@ public class Session {
     private String source;
     @NotNull
     private SessionType type;
-    
+
 
     @JsonView(Session.Views.IdOnly.class)
     public String getId() {
@@ -72,12 +70,12 @@ public class Session {
 
     public void setData(Object data) {
         if(data instanceof String) {
-            this.data = JSON.parse((String)data);
+            this.data = BasicDBObject.parse((String)data);
         } else {
-            this.data = data; 
+            this.data = data;
         }
         // JSON.serialize it so that formatting is the same if we test later
-        this.checksum = DigestUtils.md5DigestAsHex(JSON.serialize(this.data).getBytes());
+        this.checksum = DigestUtils.md5DigestAsHex(((BasicDBObject)this.data).toString().getBytes());
     }
 
     @JsonView(Session.Views.Full.class)

@@ -32,27 +32,24 @@
 
 package org.cbioportal.session_service.service.internal;
 
-import org.cbioportal.session_service.service.SessionService;
-import org.cbioportal.session_service.service.exception.*;
+import java.util.List;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import org.bson.BSONException;
+import org.bson.json.JsonParseException;
 import org.cbioportal.session_service.domain.Session;
 import org.cbioportal.session_service.domain.SessionRepository;
 import org.cbioportal.session_service.domain.SessionType;
-
-import com.mongodb.util.JSONParseException;
-import java.lang.IllegalArgumentException;
-import org.springframework.data.mongodb.UncategorizedMongoDbException;
-
-import javax.validation.ConstraintViolationException;
-import javax.validation.ConstraintViolation;
-
-import org.springframework.dao.DuplicateKeyException;
+import org.cbioportal.session_service.service.SessionService;
+import org.cbioportal.session_service.service.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.mongodb.UncategorizedMongoDbException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
- * @author Manda Wilson 
+ * @author Manda Wilson
  */
 @Service
 public class SessionServiceImpl implements SessionService {
@@ -62,13 +59,13 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public Session addSession(String source, SessionType type, String data) throws SessionInvalidException {
-        Session session = null; 
+        Session session = null;
         try {
             session = new Session();
             session.setSource(source);
             session.setType(type);
             session.setData(data);
-            
+
             sessionRepository.saveSession(session);
         } catch (DuplicateKeyException e) {
             session = sessionRepository.findOneBySourceAndTypeAndChecksum(source,
@@ -76,7 +73,9 @@ public class SessionServiceImpl implements SessionService {
                 session.getChecksum());
         } catch (ConstraintViolationException e) {
             throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
+            throw new SessionInvalidException(e.getMessage());
+        } catch (HttpMessageNotReadableException e) {
             throw new SessionInvalidException(e.getMessage());
         }
         return session;
@@ -88,11 +87,11 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public List<Session> getSessionsByQuery(String source, SessionType type, String query) 
+    public List<Session> getSessionsByQuery(String source, SessionType type, String query)
         throws SessionQueryInvalidException {
         try {
             return sessionRepository.findBySourceAndTypeAndQuery(source, type, query);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | JsonParseException | BSONException e) {
             throw new SessionQueryInvalidException(e.getMessage());
         } catch (UncategorizedMongoDbException e) {
             throw new SessionQueryInvalidException(e.getMessage());
@@ -109,7 +108,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public void updateSession(String source, SessionType type, String id, String data) throws SessionInvalidException, 
+    public void updateSession(String source, SessionType type, String id, String data) throws SessionInvalidException,
         SessionNotFoundException {
         Session savedSession = sessionRepository.findOneBySourceAndTypeAndId(source, type, id);
         if (savedSession != null) {
@@ -118,9 +117,9 @@ public class SessionServiceImpl implements SessionService {
                 sessionRepository.saveSession(savedSession);
             } catch (ConstraintViolationException e) {
                 throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
-            } catch (JSONParseException e) {
+            } catch (JsonParseException e) {
                 throw new SessionInvalidException(e.getMessage());
-            }   
+            }
             return;
         }
         throw new SessionNotFoundException(id);
@@ -128,8 +127,8 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void deleteSession(String source, SessionType type, String id) throws SessionNotFoundException {
-        int numberDeleted = sessionRepository.deleteBySourceAndTypeAndId(source, type, id);
-        if (numberDeleted != 1) { // using unique id so never more than 1 
+        long numberDeleted = sessionRepository.deleteBySourceAndTypeAndId(source, type, id);
+        if (numberDeleted != 1) { // using unique id so never more than 1
             throw new SessionNotFoundException(id);
         }
     }
