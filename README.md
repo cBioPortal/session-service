@@ -99,8 +99,8 @@ disabled by default. To enable basic authentication set:
 
 ```
 security.basic.enabled=true
-security.user.name=user
-security.user.password=pass
+spring.security.user.name=user
+spring.security.user.password=pass
 ```
 
 By default the server runs on port 8080. This can be overridden by setting the
