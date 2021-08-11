@@ -133,6 +133,7 @@ curl --user user:pass
 | settings | represent cbio page settings. page type is identified by a field `page` in it |
 | custom_data | holds study-view page custom charts data |
 | genomic_chart | represents genomic chart added by user in study-view page |
+| custom_gene_list | represents custom gene list added by user in query page |
 
 #### POST http://localhost:8080/api/sessions/{source}/{type}/
 Creates a session.  Returns status 200 and the session id in response body
