@@ -35,9 +35,10 @@ package org.cbioportal.session_service.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.mongodb.BasicDBObject;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.bson.Document;
 import org.springframework.data.annotation.Id;
 import org.springframework.util.DigestUtils;
 
@@ -70,12 +71,11 @@ public class Session {
 
     public void setData(Object data) {
         if(data instanceof String) {
-            this.data = BasicDBObject.parse((String)data);
+            this.data = Document.parse((String)data);
         } else {
             this.data = data;
         }
-        // JSON.serialize it so that formatting is the same if we test later
-        this.checksum = DigestUtils.md5DigestAsHex(((BasicDBObject)this.data).toString().getBytes());
+        this.checksum = DigestUtils.md5DigestAsHex(this.data.toString().getBytes());
     }
 
     @JsonView(Session.Views.Full.class)
