@@ -7,7 +7,7 @@ services:
     environment:
       - JAVA_OPTS=-Dspring.data.mongodb.uri=mongodb://db:27017/session-service
       # with user/pass enabled:
-      # - JAVA_OPTS=-Dspring.data.mongodb.uri=mongodb://db:27017/session-service -Dsecurity.basic.enabled=true -Dsecurity.user.name=user -Dsecurity.user.password=pass
+      # - JAVA_OPTS=-Dspring.data.mongodb.uri=mongodb://db:27017/session-service -Dsecurity.basic.enabled=true -Dspring.security.user.name=user -Dspring.security.user.password=pass
     links:
       - db
     depends_on:
