@@ -112,6 +112,12 @@
               <goal>jar</goal>
             </goals>
             <configuration>
+              <archive>
+                <manifest>
+                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                  <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                </manifest>
+              </archive>
               <classifier>model</classifier>
               <includes>
                 <include>org/cbioportal/session_service/domain/**</include>

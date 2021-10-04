@@ -8,11 +8,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/info")
 public class InfoController {
-    // This is supposed to in sync with the pom version
-    String version = "0.1.0";
 
     public String getVersion() {
-        return version;
+        return getClass().getPackage().getImplementationVersion();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "")
