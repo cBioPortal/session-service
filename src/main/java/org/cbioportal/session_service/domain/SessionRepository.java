@@ -32,10 +32,9 @@
 
 package org.cbioportal.session_service.domain;
 
-import org.cbioportal.session_service.domain.internal.SessionRepositoryCustom;
+import org.cbioportal.session_service.repository.SessionRepositoryCustom;
  
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 
 /**
  * @author Manda Wilson 
