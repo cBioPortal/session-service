@@ -45,13 +45,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * @author Manda Wilson 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SessionService.class, value= {"server.error.include-exception=true"})
+@SpringBootTest(
+    classes = SessionService.class,
+    webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "server.error.include-exception=true",
+        "spring.mongodb.embedded.version=3.5.5",
+        "spring.mvc.pathmatch.matching-strategy=ANT_PATH_MATCHER"
+    }
+)
 public class SessionServiceTest {
 
     // get randomly assigned port
@@ -66,6 +75,7 @@ public class SessionServiceTest {
         this.base = new URL("http://localhost:" + port + "/api/sessions/");
         template = new TestRestTemplate();
     }
+
 
     @After
     public void tearDown() throws Exception {
