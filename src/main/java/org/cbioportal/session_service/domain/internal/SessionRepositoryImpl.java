@@ -30,7 +30,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.session_service.repository;
+package org.cbioportal.session_service.domain.internal;
 
 import org.bson.Document;
 import org.cbioportal.session_service.domain.Session;
