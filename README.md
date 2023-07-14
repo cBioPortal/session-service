@@ -110,6 +110,15 @@ process's SERVER_PORT environment variable.
 session-service$ export set SERVER_PORT=8090; mvn package -Dpackaging.type=jar && java -Dspring.data.mongodb.uri=mongodb://localhost:27017/session-service -jar target/session_service-0.1.0.jar
 ```
 
+## Sentry support
+
+Sentry is already included as a dependency of this project, one can add the following this [Sentry official documentation](https://docs.sentry.io/platforms/java/guides/spring-boot/configuration/#setting-the-dsn) to enable sentry.
+For example, for Run without docker, add the following when starting the server:
+```
+-Dsentry.dsn=https://examplePublicKey@o0.ingest.sentry.io/0
+```
+And example command for Run with docker also included in the docker-compoase.yaml file, please refer that command to enable sentry.
+
 ## API
 
 Swagger documentation will be found here: http://[url]:[port]/swagger-ui.html e.g. http://localhost:8090/swagger-ui.html
