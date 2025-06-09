@@ -67,6 +67,6 @@ jobs:
       - name: Update Github Dependency Graph
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ steps.meta.output.tags }}
+          image: 'cbioportal/session-service:master'
           dependency-snapshot: 'true'
           github-token: '${{ secrets.GITHUB_TOKEN }}'
