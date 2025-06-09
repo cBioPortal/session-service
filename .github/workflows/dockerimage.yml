@@ -49,3 +49,24 @@ jobs:
           file: Dockerfile
           cache-from: type=gha
           cache-to: type=gha
+  update_dependency_graph:
+    needs: build_and_publish
+    if: github.repository == 'cBioPortal/session-service' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            cbioportal/session-service
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+
+      - name: Update Github Dependency Graph
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.meta.output.tags }}
+          dependency-snapshot: 'true'
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
