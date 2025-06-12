@@ -33,8 +33,8 @@
 package org.cbioportal.session_service.service.internal;
 
 import java.util.List;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.bson.BSONException;
 import org.bson.json.JsonParseException;
 import org.cbioportal.session_service.domain.Session;

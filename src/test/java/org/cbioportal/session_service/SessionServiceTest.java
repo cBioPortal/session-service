@@ -43,9 +43,8 @@ import static org.junit.Assert.assertThat;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -57,7 +56,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
     webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
         "server.error.include-exception=true",
-        "spring.mongodb.embedded.version=3.5.5",
+        "de.flapdoodle.mongodb.embedded.version=6.0.5",
         "spring.mvc.pathmatch.matching-strategy=ANT_PATH_MATCHER"
     }
 )
@@ -80,7 +79,7 @@ public class SessionServiceTest {
     @After
     public void tearDown() throws Exception {
         // get all and delete them
-        ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session/", String.class);
+        ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session", String.class);
         List<String> ids = parseIds(response.getBody());
         for (String id : ids) { 
 			template.delete(base.toString() + "msk_portal/main_session/" + id);
@@ -89,7 +88,7 @@ public class SessionServiceTest {
 
     @Test
     public void getSessionsNoData() throws Exception {
-        ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session/", String.class);
+        ResponseEntity<String> response = template.getForEntity(base.toString() + "msk_portal/main_session", String.class);
         assertThat(response.getBody(), equalTo("[]"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }
@@ -101,7 +100,7 @@ public class SessionServiceTest {
         ResponseEntity<String> response = addData("msk_portal", "main_session", data);
 
         // now test data is returned by GET /api/sessions/source/type/
-        response = template.getForEntity(base.toString() + "msk_portal/main_session/", String.class);
+        response = template.getForEntity(base.toString() + "msk_portal/main_session", String.class);
         assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data, true), equalTo(true)); 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
     }
@@ -449,7 +448,7 @@ public class SessionServiceTest {
 
     private ResponseEntity<String> addData(String source, String type, String data) throws Exception {
         HttpEntity<String> entity = prepareData(data);
-        return template.exchange(base.toString() + source + "/" + type + "/", HttpMethod.POST, entity, String.class);
+        return template.exchange(base.toString() + source + "/" + type, HttpMethod.POST, entity, String.class);
     }
 
     /*
