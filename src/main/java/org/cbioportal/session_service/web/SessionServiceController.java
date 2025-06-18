@@ -32,10 +32,15 @@
 
 package org.cbioportal.session_service.web;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.cbioportal.session_service.domain.*;
 import org.cbioportal.session_service.service.exception.*;
 import org.cbioportal.session_service.service.SessionService;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +48,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import io.swagger.annotations.ApiParam;
-
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,7 +64,7 @@ import java.util.stream.Stream;
 @RestController // shorthand for @Controller, @ResponseBody
 @RequestMapping(value = "/api/sessions/")
 @EnableWebSecurity
-public class SessionServiceController  extends WebSecurityConfigurerAdapter {
+public class SessionServiceController {
     @Value("${security.basic.enabled:false}")
     private boolean securityEnabled;
 
@@ -98,7 +100,7 @@ public class SessionServiceController  extends WebSecurityConfigurerAdapter {
     @JsonView(Session.Views.Full.class)
     public Iterable<Session> fetchSessionsByQuery(@PathVariable String source,
             @PathVariable SessionType type,
-            @ApiParam(required = true, value = "selection filter similar to mongo filter")
+            @Parameter(required = true, description = "selection filter similar to mongo filter")
             @RequestBody String query) {
         return sessionService.getSessionsByQuery(source, type, query);
     }
@@ -153,22 +155,24 @@ public class SessionServiceController  extends WebSecurityConfigurerAdapter {
         }
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         if (securityEnabled) {
-            http
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/info").permitAll()
-                .anyRequest().authenticated()
-                .and().httpBasic();
-        } else {
-            http
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/**")
-                .permitAll();
-
+            return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/info").permitAll()
+                        .anyRequest().authenticated()
+                ).httpBasic(Customizer.withDefaults())
+                .build();
+        }
+        else {
+            return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(
+                    auth -> auth.requestMatchers("/**")
+                            .permitAll()
+                )
+                .build();
         }
     }
 }

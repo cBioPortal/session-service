@@ -33,42 +33,34 @@
 package org.cbioportal.session_service.swagger;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.service.ApiInfo;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 
 @Configuration
-@EnableSwagger2
 public class SwaggerConfig {
     @Bean
-    public Docket api() { 
-        return new Docket(DocumentationType.SWAGGER_2) 
-            .select()
-            .apis(RequestHandlerSelectors.basePackage("org.cbioportal.session_service.web"))
-            .build()
-            .pathMapping("/")
-            .apiInfo(apiInfo()); 
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                .info(
+                        new Info()
+                                .title("cBioPortal session-service API")
+                                .description(
+                                        "RESTful API to access cBioPortal/cbioportal sessions in MongoDB.")
+                                .version(
+                                        "1.0 (beta)")
+                                .license(
+                                        new License()
+                                                .name("License")
+                                                .url("https://github.com/cBioPortal/cbioportal/blob/master/LICENSE"))
+                                .contact(
+                                        new Contact()
+                                                .name("cbioportal")
+                                                .url("https://www.cbioportal.org")
+                                                .email("cbioportal@googlegroups.com")));
     }
 
-    private ApiInfo apiInfo() {
-        ApiInfo apiInfo = new ApiInfo(
-            "cBioPortal session-service API", 
-            "RESTful API to access cBioPortal/cbioportal sessions in MongoDB.", 
-            "1.0 (beta)",
-            "www.cbioportal.org",
-            "cbioportal@googlegroups.com", 
-            "License", 
-            "https://github.com/cBioPortal/cbioportal/blob/master/LICENSE");
-        return apiInfo;
-    }
 }
