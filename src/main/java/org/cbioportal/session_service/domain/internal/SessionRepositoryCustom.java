@@ -44,6 +44,8 @@ public interface SessionRepositoryCustom {
 
     void saveSession(Session session);
 
+    Session createNewSession(Session session);
+
     Session findOneBySourceAndTypeAndData(String source, SessionType type, Object data);
 
     Session findOneBySourceAndTypeAndChecksum(String source, SessionType type, String checksum);

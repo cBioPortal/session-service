@@ -58,16 +58,26 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
     
     @Override
     public void saveSession(Session session) {
+        ensureIndexes(session);
+        this.mongoTemplate.save(session, session.getType().toString());
+    }
+
+    private void ensureIndexes(Session session) {
         if (!this.mongoTemplate.collectionExists(session.getType().toString())) {
             this.mongoTemplate.createCollection(session.getType().toString());
             Document indexKeys = new Document();
             indexKeys.append("source", 1);
             indexKeys.append("type", 1);
             indexKeys.append("checksum", 1);
-            this.mongoTemplate.indexOps(session.getType().toString()).ensureIndex(
-                new CompoundIndexDefinition(indexKeys).unique());
-        } 
-        this.mongoTemplate.save(session, session.getType().toString());
+            this.mongoTemplate.indexOps(session.getType().toString()).createIndex(
+                    new CompoundIndexDefinition(indexKeys).unique());
+        }
+    }
+
+    @Override
+    public Session createNewSession(Session session) {
+        ensureIndexes(session);
+        return this.mongoTemplate.insert(session, session.getType().toString());
     }
 
     public Session findOneBySourceAndTypeAndData(String source, SessionType type, Object data) {
