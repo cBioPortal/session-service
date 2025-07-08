@@ -42,6 +42,7 @@ import java.util.List;
  * @author Manda Wilson 
  */
 public interface SessionService {
+    Session addSession(String id, String source, SessionType type, String data) throws SessionInvalidException;
     Session addSession(String source, SessionType type, String data) throws SessionInvalidException;
     List<Session> getSessions(String source, SessionType type);
     List<Session> getSessionsByQuery(String source, SessionType type, String query);

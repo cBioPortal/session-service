@@ -125,6 +125,26 @@ public class SessionServiceTest {
     }
 
     @Test
+    public void addSessionWithCustomId() throws Exception {
+        // add data
+        String data = "\"portal-session\":\"my session information\"";
+        ResponseEntity<String> response = addData("msk_portal", "main_session", "custom_vs_id", data);
+
+        // test that the status was 200
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+
+        // get id
+        List<String> ids = parseIds(response.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String id = ids.get(0);
+        assertThat(id, equalTo("custom_vs_id"));
+
+        // get record
+        response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true));
+    }
+
+    @Test
     public void addSessionNoData() throws Exception {
         // add {} actually works TODO decide if it should
         String data = "";
@@ -446,9 +466,13 @@ public class SessionServiceTest {
         return new HttpEntity<String>(data, headers);
     }
 
-    private ResponseEntity<String> addData(String source, String type, String data) throws Exception {
+    private ResponseEntity<String> addData(String source, String type, String id, String data) throws Exception {
         HttpEntity<String> entity = prepareData(data);
-        return template.exchange(base.toString() + source + "/" + type, HttpMethod.POST, entity, String.class);
+        return template.exchange(base.toString() + source + "/" + type + (id == null ? "" : "/" + id), HttpMethod.POST, entity, String.class);
+    }
+
+    private ResponseEntity<String> addData(String source, String type, String data) throws Exception {
+        return addData(source, type, null, data);
     }
 
     /*

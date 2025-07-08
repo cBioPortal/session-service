@@ -57,11 +57,18 @@ public class SessionServiceImpl implements SessionService {
     @Autowired
     private SessionRepository sessionRepository;
 
+    /**
+     * Adds a session to the repository.
+     * @param id the unique identifier for the session, can be null (automatically generated)
+     */
     @Override
-    public Session addSession(String source, SessionType type, String data) throws SessionInvalidException {
+    public Session addSession(String id, String source, SessionType type, String data) throws SessionInvalidException {
         Session session = null;
         try {
             session = new Session();
+            if (id != null) {
+                session.setId(id);
+            }
             session.setSource(source);
             session.setType(type);
             session.setData(data);
@@ -79,6 +86,11 @@ public class SessionServiceImpl implements SessionService {
             throw new SessionInvalidException(e.getMessage());
         }
         return session;
+    }
+
+    @Override
+    public Session addSession(String source, SessionType type, String data) throws SessionInvalidException {
+        return addSession(null, source, type, data);
     }
 
     @Override

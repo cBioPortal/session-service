@@ -79,6 +79,15 @@ public class SessionServiceController {
         return sessionService.addSession(source, type, data);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}/{id}")
+    @JsonView(Session.Views.IdOnly.class)
+    public Session addSession(@PathVariable String source,
+                              @PathVariable SessionType type,
+                              @PathVariable String id,
+                              @RequestBody String data) {
+        return sessionService.addSession(id, source, type, data);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
     @JsonView(Session.Views.Full.class)
     public Iterable<Session> getSessions(@PathVariable String source, 
