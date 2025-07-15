@@ -100,7 +100,7 @@ public class SessionServiceImpl implements SessionService {
      * This method is different from {@link #addSession(String, SessionType, String)} in the following ways:
      *             - it does not look up and return an existing session with identical data (detected by checksum). In such scenario this method would just throw SessionAlreadyExistsException.
      *               - Note (historical context): This behavior is not the primary intent of the method, but rather a side effect of the unique index on the source, type, and checksum fields, which prevents duplicate sessions (see {@link #addSession(String, SessionType, String)}).
-     *               - Although this constraint wasn't by design, it might be useful, particularly for published virtual studies, ensuring that no two are identical.
+     *               - Although this constraint wasn't by design, it might be useful, particularly for published virtual studies, ensuring that no two are identical. Which is unlikely to happen, because the data often contains a timestamp.
      *             - it does not overwrite an existing session with the same id. In such scenario this method would throw SessionAlreadyExistsException. Only really possible when custom id is provided.
      */
     @Override
