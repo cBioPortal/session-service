@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 import static org.hamcrest.Matchers.*;
 import org.junit.*;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -157,10 +156,10 @@ public class SessionServiceTest {
         assertThat(createNewSessionResponse.getStatusCode(), equalTo(HttpStatus.OK));
 
         String data2 = "\"portal-session\":\"altered session information\"";
-        ResponseEntity<String> createDuplicateByIdResonse = createNewSession("msk_portal", "main_session", customVsId, data2);
+        ResponseEntity<String> createDuplicateByIdResponse = createNewSession("msk_portal", "main_session", customVsId, data2);
 
         // test that the status was 409
-        assertThat(createDuplicateByIdResonse.getStatusCode(), equalTo(HttpStatus.CONFLICT));
+        assertThat(createDuplicateByIdResponse.getStatusCode(), equalTo(HttpStatus.CONFLICT));
 
         // the content should not change during the conflict
         ResponseEntity<String> fetchNewSessionResponse = template.getForEntity(base.toString() + "msk_portal/main_session/" + customVsId, String.class);
