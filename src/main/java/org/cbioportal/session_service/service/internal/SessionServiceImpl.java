@@ -57,6 +57,14 @@ public class SessionServiceImpl implements SessionService {
     @Autowired
     private SessionRepository sessionRepository;
 
+    /**
+     * Adds a session to the repository.
+     * @param source - catalog of the session
+     * @param type - type of the session, e.g. "virtual_study", "settings", etc.
+     * @param data - actual payload of the session
+     * @return the session that was added, or an existing session with the same source, type and data (detected by checksum)
+     * @throws SessionInvalidException if the session data is invalid, e.g. does not conform to the schema
+     */
     @Override
     public Session addSession(String source, SessionType type, String data) throws SessionInvalidException {
         Session session = null;
@@ -66,11 +74,11 @@ public class SessionServiceImpl implements SessionService {
             session.setType(type);
             session.setData(data);
 
-            sessionRepository.saveSession(session);
+            sessionRepository.upsertSession(session);
         } catch (DuplicateKeyException e) {
             session = sessionRepository.findOneBySourceAndTypeAndChecksum(source,
-                type,
-                session.getChecksum());
+                    type,
+                    session.getChecksum());
         } catch (ConstraintViolationException e) {
             throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
         } catch (JsonParseException e) {
@@ -79,6 +87,40 @@ public class SessionServiceImpl implements SessionService {
             throw new SessionInvalidException(e.getMessage());
         }
         return session;
+    }
+
+    /**
+     * Creates a new session in the repository.
+     * @param id the custom unique identifier for the session, can be null (automatically generated)
+     * @param source - catalog of the session
+     * @param type - type of the session, e.g. "virtual_study"
+     * @param data - actual payload of the session
+     * @throws SessionAlreadyExists if a session with the same id or source, type and data already exists
+     * @throws SessionInvalidException if the session data is invalid, e.g. does not conform to the schema
+     * This method is different from {@link #addSession(String, SessionType, String)} in the following ways:
+     *             - it does not look up and return an existing session with identical data (detected by checksum). In such scenario this method would just throw SessionAlreadyExistsException.
+     *               - Note (historical context): This behavior is not the primary intent of the method, but rather a side effect of the unique index on the source, type, and checksum fields, which prevents duplicate sessions (see {@link #addSession(String, SessionType, String)}).
+     *               - Although this constraint wasn't by design, it might be useful, particularly for published virtual studies, ensuring that no two are identical. Which is unlikely to happen, because the data often contains a timestamp.
+     *             - it does not overwrite an existing session with the same id. In such scenario this method would throw SessionAlreadyExistsException. Only really possible when custom id is provided.
+     */
+    @Override
+    public Session createNewSession(String id, String source, SessionType type, String data) throws SessionInvalidException {
+        try {
+            Session session = new Session();
+            if (id != null) {
+                session.setId(id);
+            }
+            session.setSource(source);
+            session.setType(type);
+            session.setData(data);
+
+            sessionRepository.insertSession(session);
+            return session;
+        } catch (DuplicateKeyException e) {
+            throw new SessionAlreadyExists(e.getMessage());
+        } catch (RuntimeException e) {
+            throw new SessionInvalidException(e.getMessage());
+        }
     }
 
     @Override
@@ -114,7 +156,7 @@ public class SessionServiceImpl implements SessionService {
         if (savedSession != null) {
             try {
                 savedSession.setData(data);
-                sessionRepository.saveSession(savedSession);
+                sessionRepository.upsertSession(savedSession);
             } catch (ConstraintViolationException e) {
                 throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
             } catch (JsonParseException e) {

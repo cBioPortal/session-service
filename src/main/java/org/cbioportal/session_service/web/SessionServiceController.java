@@ -79,6 +79,15 @@ public class SessionServiceController {
         return sessionService.addSession(source, type, data);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}/{id}")
+    @JsonView(Session.Views.IdOnly.class)
+    public Session createNewSession(@PathVariable String source,
+                              @PathVariable SessionType type,
+                              @PathVariable String id,
+                              @RequestBody String data) {
+        return sessionService.createNewSession(id, source, type, data);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
     @JsonView(Session.Views.Full.class)
     public Iterable<Session> getSessions(@PathVariable String source, 
@@ -143,7 +152,11 @@ public class SessionServiceController {
     @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Session not found")
     @ExceptionHandler(SessionNotFoundException.class)
     public void handleSessionNotFound() {}
-    
+
+    @ResponseStatus(code = HttpStatus.CONFLICT, reason = "Session already exists")
+    @ExceptionHandler(SessionAlreadyExists.class)
+    public void handleSessionAlreadyExists() {}
+
     @ExceptionHandler
     public void handleSessionTypeInvalid(MethodArgumentTypeMismatchException e, HttpServletResponse response)
             throws IOException {

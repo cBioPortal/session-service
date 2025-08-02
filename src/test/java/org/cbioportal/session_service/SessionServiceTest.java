@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 import static org.hamcrest.Matchers.*;
 import org.junit.*;
 import static org.junit.Assert.assertThat;
+
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -122,6 +123,71 @@ public class SessionServiceTest {
         // get record
         response = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
         assertThat(expectedResponse(response.getBody(), "msk_portal", "main_session", data), equalTo(true)); 
+    }
+
+    @Test
+    public void createNewSessionWithCustomId() throws Exception {
+        // add data
+        String data = "\"portal-session\":\"my session information\"";
+        ResponseEntity<String> createNewSessionResponse = createNewSession("msk_portal", "main_session", "custom_vs_id", data);
+
+        // test that the status was 200
+        assertThat(createNewSessionResponse.getStatusCode(), equalTo(HttpStatus.OK));
+
+        // get id
+        List<String> ids = parseIds(createNewSessionResponse.getBody());
+        assertThat(ids.size(), equalTo(1));
+        String id = ids.get(0);
+        assertThat(id, equalTo("custom_vs_id"));
+
+        // get record
+        ResponseEntity<String> fetchNewSessionResponse = template.getForEntity(base.toString() + "msk_portal/main_session/" + id, String.class);
+        assertThat(expectedResponse(fetchNewSessionResponse.getBody(), "msk_portal", "main_session", data), equalTo(true));
+    }
+
+    @Test
+    public void createNewSessionWithExistingId() throws Exception {
+        String customVsId = "custom_vs_id";
+        // add data
+        String data1 = "\"portal-session\":\"my session information\"";
+        ResponseEntity<String> createNewSessionResponse = createNewSession("msk_portal", "main_session", customVsId, data1);
+
+        // test that the status was 200
+        assertThat(createNewSessionResponse.getStatusCode(), equalTo(HttpStatus.OK));
+
+        String data2 = "\"portal-session\":\"altered session information\"";
+        ResponseEntity<String> createDuplicateByIdResponse = createNewSession("msk_portal", "main_session", customVsId, data2);
+
+        // test that the status was 409
+        assertThat(createDuplicateByIdResponse.getStatusCode(), equalTo(HttpStatus.CONFLICT));
+
+        // the content should not change during the conflict
+        ResponseEntity<String> fetchNewSessionResponse = template.getForEntity(base.toString() + "msk_portal/main_session/" + customVsId, String.class);
+        assertThat(expectedResponse(fetchNewSessionResponse.getBody(), "msk_portal", "main_session", data1), equalTo(true));
+    }
+
+    @Test
+    public void createNewSessionWithIdenticalData() throws Exception {
+        // add data
+        String data1 = "\"portal-session\":\"my session information\"";
+        String customVsId1 = "custom_vs_id_1";
+        ResponseEntity<String> createNewSessionResponse = createNewSession("msk_portal", "main_session", customVsId1, data1);
+
+        // test that the status was 200
+        assertThat(createNewSessionResponse.getStatusCode(), equalTo(HttpStatus.OK));
+
+        String customVsId2 = "custom_vs_id_2";
+        ResponseEntity<String> createDuplicateByContentResponse = createNewSession("msk_portal", "main_session", customVsId2, data1);
+
+        // test that the status was 409
+        assertThat(createDuplicateByContentResponse.getStatusCode(), equalTo(HttpStatus.CONFLICT));
+
+        // the content should not change during the conflict
+        ResponseEntity<String> fetchNewSessionResponse = template.getForEntity(base.toString() + "msk_portal/main_session/" + customVsId1, String.class);
+        assertThat(expectedResponse(fetchNewSessionResponse.getBody(), "msk_portal", "main_session", data1), equalTo(true));
+
+        ResponseEntity<String> fetchDuplicateResponse = template.getForEntity(base.toString() + "msk_portal/main_session/" + customVsId2, String.class);
+        assertThat(fetchDuplicateResponse.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
@@ -449,6 +515,11 @@ public class SessionServiceTest {
     private ResponseEntity<String> addData(String source, String type, String data) throws Exception {
         HttpEntity<String> entity = prepareData(data);
         return template.exchange(base.toString() + source + "/" + type, HttpMethod.POST, entity, String.class);
+    }
+
+    private ResponseEntity<String> createNewSession(String source, String type, String id, String data) throws Exception {
+        HttpEntity<String> entity = prepareData(data);
+        return template.exchange(base.toString() + source + "/" + type + "/" + id, HttpMethod.POST, entity, String.class);
     }
 
     /*
