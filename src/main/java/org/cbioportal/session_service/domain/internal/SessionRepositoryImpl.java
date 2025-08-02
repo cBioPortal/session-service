@@ -57,7 +57,7 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
     private MongoTemplate mongoTemplate;
     
     @Override
-    public void saveSession(Session session) {
+    public void upsertSession(Session session) {
         ensureIndexes(session);
         this.mongoTemplate.save(session, session.getType().toString());
     }
@@ -75,7 +75,7 @@ public class SessionRepositoryImpl implements SessionRepositoryCustom {
     }
 
     @Override
-    public Session createNewSession(Session session) {
+    public Session insertSession(Session session) {
         ensureIndexes(session);
         return this.mongoTemplate.insert(session, session.getType().toString());
     }

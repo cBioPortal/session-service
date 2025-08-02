@@ -74,7 +74,7 @@ public class SessionServiceImpl implements SessionService {
             session.setType(type);
             session.setData(data);
 
-            sessionRepository.saveSession(session);
+            sessionRepository.upsertSession(session);
         } catch (DuplicateKeyException e) {
             session = sessionRepository.findOneBySourceAndTypeAndChecksum(source,
                     type,
@@ -114,7 +114,7 @@ public class SessionServiceImpl implements SessionService {
             session.setType(type);
             session.setData(data);
 
-            sessionRepository.createNewSession(session);
+            sessionRepository.insertSession(session);
             return session;
         } catch (DuplicateKeyException e) {
             throw new SessionAlreadyExists(e.getMessage());
@@ -156,7 +156,7 @@ public class SessionServiceImpl implements SessionService {
         if (savedSession != null) {
             try {
                 savedSession.setData(data);
-                sessionRepository.saveSession(savedSession);
+                sessionRepository.upsertSession(savedSession);
             } catch (ConstraintViolationException e) {
                 throw new SessionInvalidException(buildConstraintViolationExceptionMessage(e));
             } catch (JsonParseException e) {
