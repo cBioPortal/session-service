@@ -266,6 +266,16 @@ Example response for GET http://localhost:8080/api/sessions/msk_portal/main_sess
 ]
 ```
 
+### Create
+
+#### POST http://localhost:8080/api/sessions/{source}/{type}
+Creates a session given the source, type, and the session data in the request body. 
+Returns status 200 and the session data in the response body.
+
+#### POST http://localhost:8080/api/sessions/{source}/{type}/{id}
+Creates a session given the source, type, custom id (you can give user readable names), and the session data in the request body.
+Returns status 200 and the session data in the response body.
+
 ### Update
 
 #### PUT http://localhost:8080/api/sessions/{source}/{type}/{id}
