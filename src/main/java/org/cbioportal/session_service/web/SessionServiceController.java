@@ -73,19 +73,19 @@ public class SessionServiceController {
 
     @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}")
     @JsonView(Session.Views.IdOnly.class)
-    public Session addSession(@PathVariable String source, 
+    public Session upsertSession(@PathVariable String source,
         @PathVariable SessionType type, 
         @RequestBody String data) { 
-        return sessionService.addSession(source, type, data);
+        return sessionService.upsertSession(source, type, data);
     }
 
     @RequestMapping(method = RequestMethod.POST, value="/{source}/{type}/{id}")
     @JsonView(Session.Views.IdOnly.class)
-    public Session createNewSession(@PathVariable String source,
+    public Session insertSession(@PathVariable String source,
                               @PathVariable SessionType type,
                               @PathVariable String id,
                               @RequestBody String data) {
-        return sessionService.createNewSession(id, source, type, data);
+        return sessionService.insertSession(id, source, type, data);
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/{source}/{type}")
