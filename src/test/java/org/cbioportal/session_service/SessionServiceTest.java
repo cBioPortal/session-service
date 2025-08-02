@@ -107,7 +107,7 @@ public class SessionServiceTest {
     }
     
     @Test
-    public void addSession() throws Exception {
+    public void upsertSession() throws Exception {
         // add data
         String data = "\"portal-session\":\"my session information\"";
         ResponseEntity<String> response = addData("msk_portal", "main_session", data);
@@ -126,10 +126,10 @@ public class SessionServiceTest {
     }
 
     @Test
-    public void createNewSessionWithCustomId() throws Exception {
+    public void insertSessionWithCustomId() throws Exception {
         // add data
         String data = "\"portal-session\":\"my session information\"";
-        ResponseEntity<String> createNewSessionResponse = createNewSession("msk_portal", "main_session", "custom_vs_id", data);
+        ResponseEntity<String> createNewSessionResponse = insertSession("msk_portal", "main_session", "custom_vs_id", data);
 
         // test that the status was 200
         assertThat(createNewSessionResponse.getStatusCode(), equalTo(HttpStatus.OK));
@@ -146,17 +146,17 @@ public class SessionServiceTest {
     }
 
     @Test
-    public void createNewSessionWithExistingId() throws Exception {
+    public void insertSessionWithExistingId() throws Exception {
         String customVsId = "custom_vs_id";
         // add data
         String data1 = "\"portal-session\":\"my session information\"";
-        ResponseEntity<String> createNewSessionResponse = createNewSession("msk_portal", "main_session", customVsId, data1);
+        ResponseEntity<String> createNewSessionResponse = insertSession("msk_portal", "main_session", customVsId, data1);
 
         // test that the status was 200
         assertThat(createNewSessionResponse.getStatusCode(), equalTo(HttpStatus.OK));
 
         String data2 = "\"portal-session\":\"altered session information\"";
-        ResponseEntity<String> createDuplicateByIdResponse = createNewSession("msk_portal", "main_session", customVsId, data2);
+        ResponseEntity<String> createDuplicateByIdResponse = insertSession("msk_portal", "main_session", customVsId, data2);
 
         // test that the status was 409
         assertThat(createDuplicateByIdResponse.getStatusCode(), equalTo(HttpStatus.CONFLICT));
@@ -167,17 +167,17 @@ public class SessionServiceTest {
     }
 
     @Test
-    public void createNewSessionWithIdenticalData() throws Exception {
+    public void insertSessionWithIdenticalData() throws Exception {
         // add data
         String data1 = "\"portal-session\":\"my session information\"";
         String customVsId1 = "custom_vs_id_1";
-        ResponseEntity<String> createNewSessionResponse = createNewSession("msk_portal", "main_session", customVsId1, data1);
+        ResponseEntity<String> createNewSessionResponse = insertSession("msk_portal", "main_session", customVsId1, data1);
 
         // test that the status was 200
         assertThat(createNewSessionResponse.getStatusCode(), equalTo(HttpStatus.OK));
 
         String customVsId2 = "custom_vs_id_2";
-        ResponseEntity<String> createDuplicateByContentResponse = createNewSession("msk_portal", "main_session", customVsId2, data1);
+        ResponseEntity<String> createDuplicateByContentResponse = insertSession("msk_portal", "main_session", customVsId2, data1);
 
         // test that the status was 409
         assertThat(createDuplicateByContentResponse.getStatusCode(), equalTo(HttpStatus.CONFLICT));
@@ -191,7 +191,7 @@ public class SessionServiceTest {
     }
 
     @Test
-    public void addSessionNoData() throws Exception {
+    public void upsertSessionNoData() throws Exception {
         // add {} actually works TODO decide if it should
         String data = "";
         ResponseEntity<String> response = addData("msk_portal", "main_session", data);
@@ -206,7 +206,7 @@ public class SessionServiceTest {
     }
 
     @Test
-    public void addSessionInvalidData() throws Exception {
+    public void upsertSessionInvalidData() throws Exception {
         ResponseEntity<String> response = addData("msk_portal", "main_session", "\"portal-session\":blah blah blah"); 
         System.out.println("&&&&&&&&&&");
         System.out.println(response);
@@ -215,14 +215,14 @@ public class SessionServiceTest {
     }
 
     @Test
-    public void addSessionInvalidType() throws Exception {
+    public void upsertSessionInvalidType() throws Exception {
         ResponseEntity<String> response = addData("msk_portal", "invalid_type", "\"portal-session\":\"blah blah blah\""); 
         assertThat(response.getBody(), containsString("org.springframework.web.method.annotation.MethodArgumentTypeMismatchException"));
         assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
-    public void addSessionUniqueness() throws Exception {
+    public void upsertSessionUniqueness() throws Exception {
         // add data
         String data = "\"portal-session\":\"my session information\"";
         ResponseEntity<String> response = addData("msk_portal", "main_session", data);
@@ -517,7 +517,7 @@ public class SessionServiceTest {
         return template.exchange(base.toString() + source + "/" + type, HttpMethod.POST, entity, String.class);
     }
 
-    private ResponseEntity<String> createNewSession(String source, String type, String id, String data) throws Exception {
+    private ResponseEntity<String> insertSession(String source, String type, String id, String data) throws Exception {
         HttpEntity<String> entity = prepareData(data);
         return template.exchange(base.toString() + source + "/" + type + "/" + id, HttpMethod.POST, entity, String.class);
     }
