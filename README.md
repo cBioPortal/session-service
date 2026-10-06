@@ -342,3 +342,7 @@ If an invalid id is passed returns status 404 with a request body like this:
   "path": "/api/sessions/msk_portal/main_session/test"
 }
 ```
+
+## License
+
+session-service is licensed under the [Apache License 2.0](./LICENSE). Versions released before October 2026 were licensed under AGPL-3.0.
