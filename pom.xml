@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>4.1.0</version>
   </parent>
   <profiles>
     <profile>
@@ -48,6 +48,30 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- Boot 4 split MVC test support (and TestRestTemplate, see spring-boot-resttestclient
+         below) out of spring-boot-starter-test's transitive closure into their own modules. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-webmvc-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-resttestclient</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- TestRestTemplate's RestTemplateBuilder/request-factory wiring needs these
+         directly; they are no longer pulled in transitively by spring-boot-resttestclient. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-http-client</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-restclient</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -57,6 +81,20 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <exclusions>
+        <!-- Boot 4 defaults spring-boot-starter-web to the new Jackson 3
+             (tools.jackson) autoconfiguration. Session/domain classes here still use
+             Jackson 2 annotations (com.fasterxml.jackson.annotation.*) and @JsonView,
+             so keep the Jackson 2 autoconfiguration below instead. -->
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-jackson</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-jackson2</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -73,19 +111,23 @@
     </dependency>
     <dependency>
       <groupId>de.flapdoodle.embed</groupId>
-      <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
-      <version>4.11.0</version>
+      <artifactId>de.flapdoodle.embed.mongo.spring4x</artifactId>
+      <version>4.33.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.8.9</version>
-    </dependency>
-    <dependency>
-      <groupId>io.sentry</groupId>
-      <artifactId>sentry</artifactId>
-      <version>1.7.5</version>
+      <version>3.1.1</version>
+      <exclusions>
+        <!-- Keep Jackson 2 as the only JSON stack in the context (see the
+             spring-boot-starter-web exclusion above); springdoc 3.x otherwise pulls
+             in the new Jackson 3 autoconfiguration transitively. -->
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-jackson</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>jakarta.validation</groupId>
@@ -102,11 +144,6 @@
       <artifactId>jakarta.xml.bind-api</artifactId>
       <version>4.0.2</version>
     </dependency>
-    <dependency>
-      <groupId>io.sentry</groupId>
-      <artifactId>sentry-spring</artifactId>
-      <version>6.25.0</version>
-    </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>
@@ -121,8 +158,10 @@
 
   <properties>
     <java.version>21</java.version>
-    <tomcat.version>11.0.10</tomcat.version>
-    <spring-framework.version>6.2.10</spring-framework.version>
+    <!-- CVE fixes ahead of the Spring Boot BOM: 11.0.25 fixed three security
+         constraint/authentication bypasses (CVE-2026-65182, CVE-2026-65905,
+         CVE-2026-68525); pinning to the latest available 11.0.x patch. -->
+    <tomcat.version>11.0.27</tomcat.version>
   </properties>
   <build>
     <plugins>
