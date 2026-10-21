@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2019 The Hyve B.V.
-# This code is licensed under the GNU Affero General Public License (AGPL),
-# version 3, or (at your option) any later version.
+#
+# SPDX-License-Identifier: Apache-2.0
 #
 
 FROM maven:3-eclipse-temurin-21 as build
